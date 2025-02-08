@@ -1,0 +1,7 @@
+
+.codegpt
+.idea/
+*.iml
+*.class
+*.mvn
+target/
