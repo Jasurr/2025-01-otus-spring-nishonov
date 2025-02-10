@@ -30,7 +30,7 @@ public class TestServiceImpl implements TestService {
     private void printQuestions(List<Question> questions) {
         for (int i = 0; i < questions.size(); i++) {
             var question = questions.get(i);
-            ioService.printLine(i + " - " + question.text());
+            ioService.printLine(i+1 + " - " + question.text());
             printAnswers(question.answers());
         }
     }
