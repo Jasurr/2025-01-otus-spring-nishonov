@@ -19,7 +19,7 @@ class CommonHwTest {
 
     private static final String CONFIGURATION_ANNOTATION_NAME = "org.springframework.context.annotation.Configuration";
 
-    @DisplayName("")
+    @DisplayName("AppProperties class should not be annotated with @Configuration")
     @Test
     void shouldNotContainConfigurationAnnotationAboveItSelf() {
         assertThat(AppProperties.class.isAnnotationPresent(Configuration.class))
@@ -69,4 +69,5 @@ class CommonHwTest {
             throw new RuntimeException(e);
         }
     }
+
 }
