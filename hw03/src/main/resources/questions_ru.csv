@@ -2,3 +2,5 @@
 Есть ли жизнь на Марсе?;Это науке пока не известно%true|Конечно. Красные (НЛО) это с Марса. А зеленые (НЛО) с Венеры%false|Точно нет%false
 Как нужно загружать ресурс из jar в Java?;ClassLoader#geResourceAsStream или ClassPathResource#getInputStream%true|ClassLoader#geResource#getFile + FileReader%false|Wingardium Leviosa%false
 Какой предпочтительный способ реакции на исключения?;@SneakyThrow%false|e.printStackTrace()%false|Проброс дальше с предварительным оборачиванием в бизнес-исключение (например, QuestionReadException)%true|Игнорирование исключения%false
+Почему методы equals() и hashCode() переопределяются вместе в Java?;equals() и hashCode() должны быть согласованными, иначе коллекции могут работать некорректно%true|Достаточно только equals()%false|hashCode() никогда не нужен%false
+Какой из следующих методов является потокобезопасным?;StringBuilder%false|StringBuffer%true|ArrayList%false|HashMap%false
