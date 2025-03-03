@@ -30,11 +30,11 @@ public class CsvQuestionDaoUnitTest {
 
         assertNotNull(questions);
         assertEquals(5, questions.size());
-
+        // first question
         Question firstQuestion = questions.get(0);
         assertEquals("Is there life on Mars?", firstQuestion.text());
         assertEquals(3, firstQuestion.answers().size());
-
+        // second question
         Question secondQuestion = questions.get(1);
         assertEquals("How should resources be loaded form jar in Java?", secondQuestion.text());
         assertEquals(3, secondQuestion.answers().size());
