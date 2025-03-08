@@ -1,20 +1,18 @@
-package ru.otus.hw;
+package ru.otus.hw.dao;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.otus.hw.config.TestFileNameProvider;
-import ru.otus.hw.dao.CsvQuestionDao;
 import ru.otus.hw.domain.Question;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+class CsvQuestionDaoTest {
 
-public class CsvQuestionDaoUnitTest {
     private CsvQuestionDao csvQuestionDao;
 
     @BeforeEach
@@ -39,5 +37,4 @@ public class CsvQuestionDaoUnitTest {
         assertEquals("How should resources be loaded form jar in Java?", secondQuestion.text());
         assertEquals(3, secondQuestion.answers().size());
     }
-
 }
