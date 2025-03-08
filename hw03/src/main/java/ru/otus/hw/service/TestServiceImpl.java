@@ -7,10 +7,7 @@ import ru.otus.hw.domain.Answer;
 import ru.otus.hw.domain.Question;
 import ru.otus.hw.domain.Student;
 import ru.otus.hw.domain.TestResult;
-import ru.otus.hw.exceptions.QuestionReadException;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.List;
 
 @Service
@@ -26,16 +23,8 @@ public class TestServiceImpl implements TestService {
         ioService.printLine("");
         ioService.printLineLocalized("TestService.answer.the.questions");
         ioService.printLine("");
-        List<Question> questions;
-        try {
-            questions = questionDao.findAll();
-        } catch (QuestionReadException e) {
-            String errorMessage = getErrorMessage(e);
-            ioService.printLine(errorMessage);
-            return new TestResult(student);
-        }
+        var questions = questionDao.findAll();
         var testResult = new TestResult(student);
-
         processQuestions(questions, testResult);
         return testResult;
     }
@@ -64,17 +53,6 @@ public class TestServiceImpl implements TestService {
             }
         }
         return correctAnswer.toString();
-    }
-
-    private String getErrorMessage(QuestionReadException e) {
-        Throwable cause = e.getCause();
-        if (cause instanceof FileNotFoundException) {
-            return "Error: The test file is missing. Please contact support.";
-        } else if (cause instanceof IOException) {
-            return "Error: Unable to read the test file. Please try again later.";
-        } else {
-            return "Error: An unexpected error occurred. Please contact support.";
-        }
     }
 
 }
