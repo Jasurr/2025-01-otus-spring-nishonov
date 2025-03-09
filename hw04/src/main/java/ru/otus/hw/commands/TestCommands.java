@@ -1,4 +1,4 @@
-package ru.otus.hw.shell;
+package ru.otus.hw.commands;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.shell.standard.ShellComponent;
@@ -7,7 +7,7 @@ import ru.otus.hw.service.TestRunnerService;
 
 @ShellComponent
 @RequiredArgsConstructor
-public class ApplicationEventsAndCommandsTest {
+public class TestCommands {
     private final TestRunnerService testRunnerService;
 
     @ShellMethod(key = "run-tests", value = "Executes all configured tests")
