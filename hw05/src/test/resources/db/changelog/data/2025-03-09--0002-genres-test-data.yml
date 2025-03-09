@@ -1,0 +1,12 @@
+databaseChangeLog:
+  - changeSet:
+        id: 2025-03-09--0002-genres-test-data
+        author: Jasur
+        runOnChange: true
+        changes:
+          - loadData:
+              file: classpath:/db/changelog/data/data/2025-03-09--0002-genres-test.csv
+              tableName: genres
+              separator: ";"
+              encoding: UTF-8
+              relativeToChangelogFile: false

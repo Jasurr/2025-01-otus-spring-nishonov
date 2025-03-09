@@ -1,0 +1,11 @@
+databaseChangeLog:
+  - includeAll:
+      path: db/changelog/1.0/
+  - include:
+      file: db/changelog/data/2025-03-09--0001-authors-test-data.yml
+  - include:
+      file: db/changelog/data/2025-03-09--0002-genres-test-data.yml
+  - include:
+      file: db/changelog/data/2025-03-09--0003-books-test-data.yml
+  - include:
+      file: db/changelog/data/2025-03-09--0004-books_genres-test-data.yml
