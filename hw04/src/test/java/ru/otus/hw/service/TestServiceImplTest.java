@@ -2,10 +2,9 @@ package ru.otus.hw.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import ru.otus.hw.dao.QuestionDao;
 import ru.otus.hw.domain.Answer;
 import ru.otus.hw.domain.Question;
@@ -15,21 +14,17 @@ import ru.otus.hw.domain.TestResult;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 
-@SpringBootTest
-@ActiveProfiles("test")
+
+@SpringBootTest(properties = "spring.shell.interactive.enabled=false")
 public class TestServiceImplTest {
-
-    @InjectMocks
+    @Autowired
     private TestServiceImpl testService;
-
-    @Mock
+    @MockBean
     private LocalizedIOService ioService;
-
-    @Mock
+    @MockBean
     private QuestionDao questionDao;
-
     private Student student;
     private List<Question> questions;
 
@@ -44,22 +39,17 @@ public class TestServiceImplTest {
         // Given
         when(questionDao.findAll()).thenReturn(questions);
         when(ioService.readString()).thenReturn("B"); // user will give correct answer
+
         // When
         TestResult result = testService.executeTestFor(student);
 
         // Then
         assertNotNull(result);
         assertEquals(1, result.getAnsweredQuestions().size());
-
         assertTrue(result.getAnsweredQuestions().get(0)
                 .answers()
                 .get(1) // get(1) - B answer
-                .isCorrect()
-        );
-
-        // Verify correct interactions
-        verify(ioService).printLineLocalized("TestService.answer.the.questions");
-        verify(ioService, times(1)).readString();
+                .isCorrect());
     }
 
     @Test

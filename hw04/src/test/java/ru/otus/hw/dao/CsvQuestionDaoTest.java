@@ -1,33 +1,19 @@
 package ru.otus.hw.dao;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import ru.otus.hw.config.TestFileNameProvider;
 import ru.otus.hw.domain.Question;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.Mockito.when;
 
-@SpringBootTest
-@ActiveProfiles("test")
+@SpringBootTest(properties = "spring.shell.interactive.enabled=false")
 class CsvQuestionDaoTest {
-
-    @Mock
-    private TestFileNameProvider fileNameProvider;
-    @InjectMocks
+    @Autowired
     private CsvQuestionDao csvQuestionDao;
-
-    @BeforeEach
-    void setUp() {
-        when(fileNameProvider.getTestFileName()).thenReturn("questions.csv");
-    }
 
     @Test
     void findAll_shouldReturnListOfQuestions() {
