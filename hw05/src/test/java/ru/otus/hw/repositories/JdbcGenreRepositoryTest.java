@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.context.ActiveProfiles;
 import ru.otus.hw.models.Genre;
 
 import java.util.List;
@@ -22,7 +21,7 @@ class JdbcGenreRepositoryTest {
     @Autowired
     private JdbcGenreRepository repositoryJdbc;
 
-    List<Genre> dbGenres;
+    private List<Genre> dbGenres;
 
     @BeforeEach
     void setUp() {

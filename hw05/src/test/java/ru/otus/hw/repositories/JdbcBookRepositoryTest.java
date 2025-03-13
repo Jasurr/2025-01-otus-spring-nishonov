@@ -1,18 +1,13 @@
 package ru.otus.hw.repositories;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
-import org.springframework.test.annotation.Rollback;
-import org.springframework.test.context.ActiveProfiles;
 import ru.otus.hw.models.Author;
 import ru.otus.hw.models.Book;
 import ru.otus.hw.models.Genre;
@@ -24,7 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("Репозиторий на основе Jdbc для работы с книгами ")
 @JdbcTest
-@Import({JdbcBookRepository.class, JdbcGenreRepository.class})
+@Import({JdbcBookRepository.class, JdbcGenreRepository.class, JdbcAuthorRepository.class})
 class JdbcBookRepositoryTest {
 
     @Autowired

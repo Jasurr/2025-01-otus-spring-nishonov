@@ -6,13 +6,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.context.ActiveProfiles;
 import ru.otus.hw.models.Author;
 
 import java.util.List;
 import java.util.stream.IntStream;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DisplayName("Репозиторий на основе Jdbc для работы с авторами ")
 @JdbcTest
@@ -21,7 +20,7 @@ class JdbcAuthorRepositoryTest {
     @Autowired
     private JdbcAuthorRepository repositoryJdbc;
 
-    List<Author> dbAuthors;
+    private List<Author> dbAuthors;
 
     @BeforeEach
     void setUp() {
