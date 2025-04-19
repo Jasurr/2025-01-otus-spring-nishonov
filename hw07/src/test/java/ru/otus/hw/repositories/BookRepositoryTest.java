@@ -63,7 +63,7 @@ class BookRepositoryTest {
     @DisplayName("Should find all books with genres")
     void shouldFindAllWithGenres() {
         bookRepository.save(testBook);
-        List<Book> books = bookRepository.findAllWithGenres();
+        List<Book> books = bookRepository.findAll();
         assertFalse(books.isEmpty());
         assertTrue(books.stream().anyMatch(b -> b.getTitle().equals(testBook.getTitle())));
     }
