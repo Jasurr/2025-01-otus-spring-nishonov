@@ -1,0 +1,12 @@
+spring:
+  data:
+    mongodb:
+      authentication-database: admin
+      database: book_db
+      port: 27017
+      host: localhost
+  liquibase:
+    enabled: false
+    change-log: classpath:db/changelog/db.changelog-master.yml
+    url: mongodb://localhost:27017/book_db
+    driver-class-name: liquibase.ext.mongodb.database.MongoClientDriver

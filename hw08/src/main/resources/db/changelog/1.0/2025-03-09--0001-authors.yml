@@ -1,0 +1,7 @@
+databaseChangeLog:
+  - changeSet:
+      id: 2025-03-09--0001--authors
+      author: Jasur
+      changes:
+        - createCollection:
+            collectionName: authors

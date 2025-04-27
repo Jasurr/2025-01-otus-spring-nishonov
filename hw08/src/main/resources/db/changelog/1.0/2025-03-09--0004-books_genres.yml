@@ -1,0 +1,7 @@
+databaseChangeLog:
+  - changeSet:
+      id: 2025-03-09--0001--books_genres
+      author: Jasur
+      changes:
+        - createCollection:
+            collectionName: books_genres
