@@ -24,8 +24,8 @@ import java.util.List;
 @NoArgsConstructor
 public class Genre {
     @Id
-    @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private long id;
 
     @Column(name = "name")
