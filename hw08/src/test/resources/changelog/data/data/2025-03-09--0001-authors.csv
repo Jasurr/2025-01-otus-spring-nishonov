@@ -1,4 +1,14 @@
-full_name
-Author_1
-Author_2
-Author_3
+[
+    {
+        "_id": "author1",
+        "fullName": "Author_1"
+    },
+    {
+        "_id": "author2",
+        "fullName": "Author_2"
+    },
+    {
+        "_id": "author3",
+        "fullName": "Author_3"
+    }
+]

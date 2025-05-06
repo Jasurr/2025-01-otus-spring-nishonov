@@ -1,93 +1,76 @@
 package ru.otus.hw.models;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.OneToOne;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.reflections.ReflectionUtils;
 import org.reflections.Reflections;
+import org.springframework.data.mongodb.core.mapping.DBRef;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static java.util.Objects.isNull;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class ModelsCommonTest {
 
-    private static Set<Class<?>> entitiesClasses;
+    private static Set<Class<?>> documentClasses;
 
     @BeforeAll
     static void setUpAll() {
         var reflections = new Reflections("ru.otus.hw.models");
-        entitiesClasses = reflections.getTypesAnnotatedWith(Entity.class);
-
+        documentClasses = reflections.getTypesAnnotatedWith(Document.class);
     }
 
     @ParameterizedTest
-    @MethodSource("getEntities")
-    void shouldBeNoOneToOneRelationshipsInModelClasses(Class<?> entityClass) {
-
-        var oneToOneRelationshipExists = Arrays.stream(entityClass.getDeclaredFields())
-                .anyMatch(f -> f.isAnnotationPresent(OneToOne.class));
-        assertThat(oneToOneRelationshipExists)
-                .withFailMessage("В доменной модели ДЗ не предусмотрены связи OneToOne")
+    @MethodSource("getDocuments")
+    void shouldBeNoDBRefInModelClasses(Class<?> documentClass) {
+        var dbRefExists = Arrays.stream(documentClass.getDeclaredFields())
+                .anyMatch(f -> f.isAnnotationPresent(DBRef.class));
+        assertThat(dbRefExists)
+                .withFailMessage("В моделях MongoDB не должны использоваться связи DBRef")
                 .isFalse();
     }
 
     @ParameterizedTest
-    @MethodSource("getEntities")
-    void shouldBeNoEagerRelationshipsInModelClasses(Class<?> entityClass) {
-        boolean eagerFetchExists = Arrays.stream(entityClass.getDeclaredFields())
-                .map(f -> getRelationAnnotationArgumentValue(f, "fetch", FetchType.class))
-                .filter(Objects::nonNull)
-                .anyMatch(fetchType -> fetchType.equals(FetchType.EAGER));
-        assertThat(eagerFetchExists)
-                .withFailMessage("Лучше все связи сделать LAZY")
+    @MethodSource("getDocuments")
+    void shouldAvoidNestedDocumentsInModelClasses(Class<?> documentClass) {
+        boolean nestedDocumentExists = Arrays.stream(documentClass.getDeclaredFields())
+                .filter(f -> !f.getType().isPrimitive())
+                .anyMatch(f -> documentClasses.contains(f.getType()));
+        assertThat(nestedDocumentExists)
+                .withFailMessage("В моделях MongoDB не должны использоваться вложенные документы (nested documents)")
                 .isFalse();
     }
 
     @ParameterizedTest
-    @MethodSource("getEntities")
-    void shouldMappedForBidirectionalRelationshipsInModelClasses(Class<?> entityClass) {
-        var relationsEntries = findAllRelationsEntry(entityClass);
-        var hasBidirectionalRelationshipsWithoutMappedBy = relationsEntries.entrySet().stream()
+    @MethodSource("getDocuments")
+    void shouldUseEmbeddedRelationshipsCorrectly(Class<?> documentClass) {
+        var relationsEntries = findAllRelationsEntry(documentClass);
+        var hasIncorrectEmbeddedRelationships = relationsEntries.entrySet().stream()
                 .anyMatch(relationEntry -> {
-                    var reverseRelations = findAllRelationsEntry(relationEntry.getKey());
-                    var reverseRelationField = reverseRelations.get(entityClass);
-                    if (isNull(reverseRelationField)) {
-                        return false;
-                    }
-                    var relationFieldName = relationEntry.getValue().getName();
-                    var reverseRelationFieldName = reverseRelationField.getName();
-                    var mappedByValue = getRelationAnnotationArgumentValue(relationEntry.getValue(),
-                            "mappedBy", String.class);
-                    var reverseMappedByValue = getRelationAnnotationArgumentValue(reverseRelationField,
-                            "mappedBy", String.class);
-
-                    return !reverseRelationFieldName.equals(mappedByValue) &&
-                            !relationFieldName.equals(reverseMappedByValue);
+                    var relatedClass = relationEntry.getKey();
+                    var field = relationEntry.getValue();
+                    var isEmbedded = !field.isAnnotationPresent(DBRef.class) && !Collection.class.isAssignableFrom(field.getType());
+                    return !isEmbedded;
                 });
-        assertThat(hasBidirectionalRelationshipsWithoutMappedBy)
-                .withFailMessage("Двунаправленные связи должны быть настроены с помощью mappedBy")
+        assertThat(hasIncorrectEmbeddedRelationships)
+                .withFailMessage("В моделях MongoDB связи должны быть правильно настроены в виде embedded")
                 .isFalse();
-
     }
 
-    private static Stream<Arguments> getEntities() {
-        return entitiesClasses.stream().map(Arguments::of);
+    private static Stream<Arguments> getDocuments() {
+        return documentClasses.stream().map(Arguments::of);
     }
 
-    private <T> T getRelationAnnotationArgumentValue(Field field, String argumentName, Class<T> returnType) {
+    private <T> T getAnnotationArgumentValue(Field field, String argumentName, Class<T> returnType) {
         return Arrays.stream(field.getAnnotations())
                 .flatMap(a -> Arrays.stream(a.getClass().getDeclaredMethods()).map(m -> Map.entry(m, a)))
                 .filter(e -> e.getKey().getName().equals(argumentName))
@@ -96,11 +79,11 @@ class ModelsCommonTest {
                 .findFirst().orElse(null);
     }
 
-    private Map<? extends Class<?>, Field> findAllRelationsEntry(Class<?> entityClass) {
-        return Arrays.stream(entityClass.getDeclaredFields())
+    private Map<? extends Class<?>, Field> findAllRelationsEntry(Class<?> documentClass) {
+        return Arrays.stream(documentClass.getDeclaredFields())
                 .filter(f -> !f.getType().isPrimitive())
                 .map(f -> Map.entry(f, fieldToClass(f)))
-                .filter(e -> entitiesClasses.contains(e.getValue()))
+                .filter(e -> documentClasses.contains(e.getValue()))
                 .collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
     }
 
@@ -109,7 +92,6 @@ class ModelsCommonTest {
         if (Collection.class.isAssignableFrom(field.getType())) {
             className = field.getGenericType().getTypeName()
                     .split("<")[1].split(">")[0];
-
         }
         try {
             return Class.forName(className);

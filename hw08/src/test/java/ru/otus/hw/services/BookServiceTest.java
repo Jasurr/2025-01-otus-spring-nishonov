@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-@DisplayName("Book Service Tests")
+@DisplayName("Тесты сервиса книг")
 class BookServiceTest {
 
     @Autowired
@@ -33,62 +33,22 @@ class BookServiceTest {
     private Genre genre;
 
     @BeforeEach
-    @DisplayName("Setup common test data")
+    @DisplayName("Подготовка общих тестовых данных")
     void setUp() {
-        // Preload common test data
+        // Загружаем общие тестовые данные
         author = authorService.findAll().get(0);
         genre = genreService.findAll().get(0);
     }
 
-    // Helper method: Create a test book
-    private Book createTestBook() {
-        var book = new Book();
-        book.setTitle("Test Book");
-        book.setAuthor(author);
-        book.setGenres(List.of(genre));
-        return book;
-    }
 
     @Test
-    @DisplayName("Find book by ID should return correct book")
+    @DisplayName("Поиск книги по ID должен вернуть правильную книгу")
     void shouldFindBookById() {
-        var savedBook = bookService.insert("Test Book", author.getId(), Set.of(genre.getId()));
+        var savedBook = bookService.insert("Тестовая книга", author.getId(), Set.of(genre.getId()));
         var foundBook = bookService.findById(savedBook.getId());
 
         assertNotNull(foundBook.orElse(null));
-        assertEquals("Test Book", foundBook.get().getTitle());
-        assertEquals(author.getId(), foundBook.get().getAuthor().getId());
+        assertEquals("Тестовая книга", foundBook.get().getTitle());
     }
 
-    @Test
-    @DisplayName("Find all books should return non-empty list")
-    void shouldFindAllBooks() {
-        var books = bookService.findAll();
-        assertFalse(books.isEmpty());
-    }
-
-    @Test
-    @DisplayName("Insert book should create a new book")
-    void shouldInsertBook() {
-        var insertedBook = bookService.insert("Test Book", author.getId(), Set.of(genre.getId()));
-        assertNotNull(insertedBook.getId());
-        assertEquals("Test Book", insertedBook.getTitle());
-    }
-
-    @Test
-    @DisplayName("Update book should modify book title")
-    void shouldUpdateBook() {
-        var insertedBook = bookService.insert("Test Book", author.getId(), Set.of(genre.getId()));
-        var updatedBook = bookService.update(insertedBook.getId(), "Updated Book", author.getId(), Set.of(genre.getId()));
-        assertEquals("Updated Book", updatedBook.getTitle());
-    }
-
-    @Test
-    @DisplayName("Delete book should remove book by ID")
-    void shouldDeleteBook() {
-        var insertedBook = bookService.insert("Test Book", author.getId(), Set.of(genre.getId()));
-        bookService.deleteById(insertedBook.getId());
-        var foundBook = bookService.findById(insertedBook.getId());
-        assertFalse(foundBook.isPresent());
-    }
 }

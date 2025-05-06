@@ -1,0 +1,16 @@
+[
+  [
+    {
+      "_id": "book1",
+      "title": "Sample Book",
+      "authorId": "1",
+      "genres": ["1", "2"]
+    },
+    {
+      "_id": "book2",
+      "title": "Another Book",
+      "authorId": "2",
+      "genres": ["3", "4"]
+    }
+  ]
+]

@@ -1,0 +1,26 @@
+[
+  {
+    "_id": "author1",
+    "name": "Author 1"
+  },
+  {
+    "_id": "author2",
+    "name": "Author 2"
+  },
+  {
+    "_id": "author3",
+    "name": "Author 3"
+  },
+  {
+    "_id": "author4",
+    "name": "Author 4"
+  },
+  {
+    "_id": "author5",
+    "name": "Author 5"
+  },
+  {
+    "_id": "author6",
+    "name": "Author 6"
+  }
+]
