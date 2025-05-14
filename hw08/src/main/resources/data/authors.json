@@ -1,42 +1,14 @@
 [
   {
     "_id": "1",
-    "name": "Author 1"
+    "full_name": "Author 1"
   },
   {
     "_id": "2",
-    "name": "Author 2"
+    "full_name": "Author 2"
   },
   {
     "_id": "3",
-    "name": "Author 3"
-  },
-  {
-    "_id": "4",
-    "name": "Author 4"
-  },
-  {
-    "_id": "5",
-    "name": "Author 5"
-  },
-  {
-    "_id": "6",
-    "name": "Author 6"
-  },
-  {
-    "_id": "7",
-    "name": "Author 7"
-  },
-  {
-    "_id": "8",
-    "name": "Author 8"
-  },
-  {
-    "_id": "9",
-    "name": "Author 9"
-  },
-  {
-    "_id": "10",
-    "name": "Author 10"
+    "full_name": "Author 3"
   }
 ]

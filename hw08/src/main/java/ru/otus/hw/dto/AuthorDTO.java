@@ -6,19 +6,15 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.List;
-
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class BookDTO {
+public class AuthorDTO {
     @JsonProperty("_id")
     private String id;
-    @JsonProperty("title")
-    private String title;
-    @JsonProperty("author_id")
-    private String author;
-    @JsonProperty("genres")
-    private List<String> genres;
+
+    @JsonProperty("full_name")
+    private String fullName;
+
 }

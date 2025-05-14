@@ -1,16 +1,29 @@
 [
-  [
-    {
-      "_id": "book1",
-      "title": "Sample Book",
-      "authorId": "1",
-      "genres": ["1", "2"]
-    },
-    {
-      "_id": "book2",
-      "title": "Another Book",
-      "authorId": "2",
-      "genres": ["3", "4"]
-    }
-  ]
+  {
+    "_id": "book1",
+    "title": "Sample Book",
+    "author_id": "1",
+    "genres": [
+      "1",
+      "2"
+    ]
+  },
+  {
+    "_id": "book2",
+    "title": "Another Book",
+    "author_id": "2",
+    "genres": [
+      "3",
+      "4"
+    ]
+  },
+  {
+    "_id": "book3",
+    "title": "Third Book",
+    "author_id": "1",
+    "genres": [
+      "5",
+      "6"
+    ]
+  }
 ]

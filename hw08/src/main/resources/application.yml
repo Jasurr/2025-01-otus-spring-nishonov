@@ -5,3 +5,7 @@ spring:
       database: book_db
       port: 27017
       host: localhost
+
+mongock:
+  migration-scan-package:
+    - ru.otus.hw.migration
