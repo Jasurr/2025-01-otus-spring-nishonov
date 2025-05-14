@@ -1,7 +1,7 @@
 package ru.otus.hw.repositories;
 
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import ru.otus.hw.models.Genre;
@@ -11,9 +11,9 @@ import java.util.Set;
 
 @Transactional
 @Repository
+@RequiredArgsConstructor
 public class JpaGenreRepository implements GenreRepository {
-    @PersistenceContext
-    private EntityManager em;
+    private final EntityManager em;
 
     @Override
     public List<Genre> findAllByIds(Set<Long> ids) {

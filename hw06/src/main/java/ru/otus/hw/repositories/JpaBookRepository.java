@@ -2,46 +2,45 @@ package ru.otus.hw.repositories;
 
 import jakarta.persistence.EntityGraph;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 import ru.otus.hw.models.Book;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
-@Transactional
 @Repository
+@RequiredArgsConstructor
 public class JpaBookRepository implements BookRepository {
-    @PersistenceContext
-    private EntityManager em;
+    private final EntityManager em;
 
     @Override
     public List<Book> findAllWithGenres() {
-        EntityGraph<?> entityGraph = em.createEntityGraph("Book.withGenresAndAuthor");
+        EntityGraph<?> entityGraph = em.createEntityGraph("Book.withAuthorOnly");
         TypedQuery<Book> query = em.createQuery("select b from Book b", Book.class);
         query.setHint("javax.persistence.fetchgraph", entityGraph);
-        return query.getResultList();
+        List<Book> books = query.getResultList();
+        books.forEach(b -> b.getGenres().size()); // trigger SUBSELECT
+        return books;
     }
 
     @Override
     public Optional<Book> findById(long id) {
-        EntityGraph<?> entityGraph = em.createEntityGraph("Book.withGenresAndAuthor");
-        TypedQuery<Book> query = em.createQuery("select b from Book b where b.id = :id", Book.class);
-        query.setHint("javax.persistence.fetchgraph", entityGraph);
+        EntityGraph<?> entityGraph = em.createEntityGraph("Book.withAuthorAndGenres");
+        Map<String, Object> properties = Map.of("javax.persistence.fetchgraph", entityGraph);
 
-        return query
-                .setParameter("id", id)
-                .getResultStream()
-                .findFirst();
+        Book book = em.find(Book.class, id, properties);
+        return Optional.ofNullable(book);
     }
 
     @Override
     public void deleteById(long id) {
-        em.createQuery("delete from Book b where b.id = :id")
-                .setParameter("id", id)
-                .executeUpdate();
+        Book book = em.find(Book.class, id); // Must be managed (attached to the persistence context)
+        if (book != null) {
+            em.remove(book); // Entity is removed from database
+        }
     }
 
     @Override

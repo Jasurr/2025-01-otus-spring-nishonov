@@ -60,14 +60,22 @@ class JpaCommentRepositoryTest {
     @Test
     @DisplayName("Should update saved comment")
     void shouldUpdateComment() {
+        // Step 1: Get the book by its ID
         var book = getBookById(FIRST_BOOK_ID);
+
+        // Step 2: Create and save a new comment
         var comment = createComment(COMMENT_MESSAGE, book);
         var savedComment = jpaCommentRepository.save(comment);
+
+        // Step 3: Update the saved comment's message
         savedComment.setMessage(UPDATED_MESSAGE);
-        var updatedComment = jpaCommentRepository.save(savedComment);
+
+        // Step 4: Save the updated comment (only once)
+        jpaCommentRepository.save(savedComment);
         em.flush();
 
-        var foundComment = em.find(Comment.class, updatedComment.getId());
+        // Step 5: Verify if the message was updated
+        var foundComment = em.find(Comment.class, savedComment.getId());
         assertThat(foundComment.getMessage()).isEqualTo(UPDATED_MESSAGE);
     }
 

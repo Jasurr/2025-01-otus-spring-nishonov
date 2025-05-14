@@ -1,47 +1,42 @@
 package ru.otus.hw.repositories;
 
-import jakarta.persistence.EntityGraph;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.TypedQuery;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+import ru.otus.hw.models.Book;
 import ru.otus.hw.models.Comment;
 
 import java.util.List;
 import java.util.Optional;
 
 @Repository
+@RequiredArgsConstructor
 public class JpaCommentRepository implements CommentRepository {
-    @PersistenceContext
-    private EntityManager em;
+    private final EntityManager em;
 
     @Override
     public List<Comment> findByBookId(long bookId) {
-        EntityGraph<?> entityGraph = em.getEntityGraph("Comment.withBook");
-        TypedQuery<Comment> query =
-                this.em.createQuery("select c from Comment c where c.book.id = :bookId", Comment.class)
-                .setParameter("bookId", bookId);
-        query.setHint("javax.persistence.fetchgraph", entityGraph);
-
-        return query.getResultList();
+        Book book = em.find(Book.class, bookId);
+        return em.createQuery(
+                        "select c from Comment c where c.book = :book", Comment.class)
+                .setParameter("book", book)
+                .getResultList();
     }
 
     @Override
     public Optional<Comment> findById(long id) {
-        EntityGraph<?> entityGraph = em.getEntityGraph("Comment.withBook");
-        TypedQuery<Comment> query = em.createQuery("select c from Comment c where c.id = :id", Comment.class)
-                .setParameter("id", id);
-        query.setHint("javax.persistence.fetchgraph", entityGraph);
-        return query
+        return em.createQuery("select c from Comment c where c.id = :id", Comment.class)
+                .setParameter("id", id)
                 .getResultStream()
                 .findFirst();
     }
 
     @Override
     public void deleteById(long id) {
-        em.createQuery("delete from Comment c where c.id = :id")
-                .setParameter("id", id)
-                .executeUpdate();
+        var comment = em.find(Comment.class, id);
+        if (comment != null) {
+            em.remove(comment);
+        }
     }
 
     @Override
