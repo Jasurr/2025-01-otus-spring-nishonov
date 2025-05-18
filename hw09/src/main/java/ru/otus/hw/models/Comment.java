@@ -11,8 +11,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GenerationType;
-import jakarta.persistence.NamedEntityGraph;
-import jakarta.persistence.NamedAttributeNode;
 import jakarta.persistence.ForeignKey;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

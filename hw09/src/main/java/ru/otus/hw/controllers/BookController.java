@@ -3,8 +3,13 @@ package ru.otus.hw.controllers;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import ru.otus.hw.models.Book;
+import ru.otus.hw.models.Genre;
 import ru.otus.hw.services.AuthorService;
 import ru.otus.hw.services.BookService;
 import ru.otus.hw.services.GenreService;
@@ -39,7 +44,7 @@ public class BookController {
     @PostMapping("/add")
     public String saveNewBook(@ModelAttribute("book") Book book) {
         var genreIds = book.getGenres().stream()
-                .map(genre -> genre.getId())
+                .map(Genre::getId)
                 .collect(Collectors.toSet());
         bookService.insert(book.getTitle(), book.getAuthor().getId(), genreIds);
         return "redirect:/book";
@@ -57,7 +62,7 @@ public class BookController {
     @PostMapping("/edit")
     public String updateBook(@ModelAttribute("book") Book book) {
         var genreIds = book.getGenres().stream()
-                .map(genre -> genre.getId())
+                .map(Genre::getId)
                 .collect(Collectors.toSet());
         bookService.update(book.getId(), book.getTitle(), book.getAuthor().getId(), genreIds);
         return "redirect:/book";
