@@ -1,7 +1,0 @@
-databaseChangeLog:
-  - changeSet:
-      id: 2025-03-18---0005-comments
-      author: Jasur
-      changes:
-        - createCollection:
-            collectionName: comments

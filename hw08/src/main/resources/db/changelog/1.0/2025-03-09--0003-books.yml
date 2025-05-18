@@ -1,7 +1,0 @@
-databaseChangeLog:
-  - changeSet:
-      id: 2025-03-09--0001--books
-      author: Jasur
-      changes:
-        - createCollection:
-            collectionName: books

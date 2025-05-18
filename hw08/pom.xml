@@ -21,10 +21,10 @@
         <spring.shell.version>3.2.4</spring.shell.version>
         <checkstyle-plugin.version>3.3.1</checkstyle-plugin.version>
         <checkstyle.version>10.15.0</checkstyle.version>
-        <liquibase.version>4.31.1</liquibase.version>
-        <reflection.version>0.10.2</reflection.version>
-        <mongodb.version>5.1.0</mongodb.version>
         <flapdoodle.version>4.20.0</flapdoodle.version>
+        <mongock.version>5.5.1</mongock.version>
+        <jackson.annotations.version>2.19.0</jackson.annotations.version>
+        <jackson.databind.version>2.17.2</jackson.databind.version>
         <checkstyle.config.url>
             https://raw.githubusercontent.com/OtusTeam/Spring/master/checkstyle.xml
         </checkstyle.config.url>
@@ -50,69 +50,45 @@
         </dependency>
 
         <dependency>
-            <groupId>org.mongodb</groupId>
-            <artifactId>mongodb-driver-sync</artifactId>
-            <version>${mongodb.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.mongodb</groupId>
-            <artifactId>mongodb-driver-core</artifactId>
-            <version>${mongodb.version}</version>
-        </dependency>
-
-        <!-- https://mvnrepository.com/artifact/io.mongock/mongock-springboot -->
-        <dependency>
-            <groupId>io.mongock</groupId>
-            <artifactId>mongock-springboot</artifactId>
-            <version>5.5.1</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.mongock</groupId>
-            <artifactId>mongodb-springdata-v4-driver</artifactId>
-            <version>5.5.1</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-mongodb</artifactId>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>${jackson.annotations.version}</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.17.2</version>
+            <version>${jackson.databind.version}</version>
         </dependency>
 
+        <!-- Spring Boot Starter for MongoDB -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-mongodb</artifactId>
+        </dependency>
+
+        <!-- Mongock Core -->
+        <dependency>
+            <groupId>io.mongock</groupId>
+            <artifactId>mongock-springboot</artifactId>
+            <version>${mongock.version}</version>
+        </dependency>
+
+        <!-- Mongock Driver for Spring Data MongoDB v4 -->
+        <dependency>
+            <groupId>io.mongock</groupId>
+            <artifactId>mongodb-springdata-v4-driver</artifactId>
+            <version>${mongock.version}</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/de.flapdoodle.embed/de.flapdoodle.embed.mongo -->
         <dependency>
             <groupId>de.flapdoodle.embed</groupId>
             <artifactId>de.flapdoodle.embed.mongo</artifactId>
-            <version>${flapdoodle.version}</version>
+            <version>4.20.0</version>
             <scope>test</scope>
         </dependency>
-
-        <dependency>
-            <groupId>org.reflections</groupId>
-            <artifactId>reflections</artifactId>
-            <version>${reflection.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-annotations</artifactId>
-            <version>2.19.0</version> <!-- Mos versiyalarni tanlang -->
-        </dependency>
     </dependencies>
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>io.mongock</groupId>
-                <artifactId>mongock-bom</artifactId>
-                <version>5.3.1</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
+
     <build>
         <plugins>
             <plugin>

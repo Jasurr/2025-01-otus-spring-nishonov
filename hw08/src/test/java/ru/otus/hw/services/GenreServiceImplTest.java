@@ -4,14 +4,16 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ActiveProfiles;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@ActiveProfiles("test")
+@Import(GenreServiceImpl.class)
 @DisplayName("Genre Service Tests")
-class GenreServiceImplTest {
+public class GenreServiceImplTest {
     @Autowired
     private GenreService genreService;
 
@@ -19,6 +21,9 @@ class GenreServiceImplTest {
     @Test
     void shouldFindAllGenres() {
         var genres = genreService.findAll();
-        assertFalse(genres.isEmpty());
+        assertThat(genres)
+                .isNotNull()
+                .isNotEmpty()
+                .allMatch(genre -> genre.getName() != null && !genre.getName().isEmpty());
     }
 }

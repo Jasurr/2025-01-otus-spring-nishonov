@@ -31,7 +31,9 @@ public class BookServiceImpl implements BookService {
     @Transactional(readOnly = true)
     @Override
     public List<BookDTO> findAll() {
-        return bookRepository.findAllWithAuthorAndGenres();
+        return bookRepository.findAllWithAuthorAndGenres()
+                .stream()
+                .toList();
     }
 
     @Transactional
@@ -80,6 +82,7 @@ public class BookServiceImpl implements BookService {
         return bookRepository.findByIdWithAuthorAndGenres(book.getId())
                 .orElseThrow(() -> new EntityNotFoundException("Book with id %s not found".formatted(book.getId())));
     }
+
     private void validateInputs(String id, String title, String authorId, Set<String> genresIds) {
         if (title == null || title.trim().isEmpty()) {
             throw new IllegalArgumentException("Title must not be null or empty");
@@ -87,7 +90,7 @@ public class BookServiceImpl implements BookService {
         if (authorId == null || authorId.trim().isEmpty()) {
             throw new IllegalArgumentException("Author ID must not be null or empty");
         }
-        if (genresIds == null || genresIds.isEmpty() || genresIds.contains(null)) {
+        if (genresIds == null || genresIds.isEmpty()) {
             throw new IllegalArgumentException("Genres IDs must not be null, empty, or contain null elements");
         }
         if (id != null && id.trim().isEmpty()) {

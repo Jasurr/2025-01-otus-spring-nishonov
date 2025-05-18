@@ -1,6 +1,5 @@
 package ru.otus.hw.models;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,7 +15,6 @@ import org.springframework.data.mongodb.core.mapping.Field;
 @NoArgsConstructor
 public class Author {
     @Id
-    @Field(name = "_id")
     private String id;
 
     @Field(name = "full_name")

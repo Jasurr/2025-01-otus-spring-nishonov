@@ -11,10 +11,15 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AuthorDTO {
-    @JsonProperty("_id")
+    @JsonProperty("id")
     private String id;
 
     @JsonProperty("full_name")
     private String fullName;
 
+    @Override
+    public String toString() {
+        return "id=\"" + id + '\"' +
+                ", fullName=\"" + fullName + '\"';
+    }
 }

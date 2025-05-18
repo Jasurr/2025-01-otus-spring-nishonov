@@ -1,4 +1,4 @@
-package ru.otus.hw.models;
+package org.example.mongoktest.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -6,21 +6,15 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.Field;
 
-
-@Document(collection = "comments")
+@Document
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Comment {
+public class User {
     @Id
     private String id;
-
-    @Field(name = "message")
-    private String message;
-
-    @Field(name = "book_id")
-    private String bookId;
+    private String name;
+    private int age;
 }

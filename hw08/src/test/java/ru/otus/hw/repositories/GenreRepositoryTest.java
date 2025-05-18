@@ -2,11 +2,14 @@ package ru.otus.hw.repositories;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
-@DataJpaTest
+
+@SpringBootTest
+@ActiveProfiles("test")
 class GenreRepositoryTest {
     @Autowired
     private GenreRepository genreRepository;
@@ -14,7 +17,10 @@ class GenreRepositoryTest {
     @Test
     void shouldFindAll() {
         var genres = genreRepository.findAll();
-        assertFalse(genres.isEmpty());
+        assertThat(genres)
+                .isNotNull()
+                .isNotEmpty()
+                .allMatch(genre -> genre.getName() != null && !genre.getName().isEmpty());
     }
 
 }

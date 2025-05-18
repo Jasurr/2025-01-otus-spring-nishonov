@@ -1,5 +1,6 @@
 package ru.otus.hw.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,12 +12,17 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class BookDTO {
+public class BookMigrateDTO {
+
+    @JsonProperty("id")
     private String id;
 
+    @JsonProperty("title")
     private String title;
 
-    private AuthorDTO author;
+    @JsonProperty("author_id")
+    private String authorId;
 
-    private List<GenreDTO> genres;
+    @JsonProperty("genres")
+    private List<String> genres;
 }

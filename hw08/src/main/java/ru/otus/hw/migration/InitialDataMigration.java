@@ -2,17 +2,13 @@ package ru.otus.hw.migration;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.mongock.api.annotations.ChangeUnit;
-import io.mongock.api.annotations.Execution;
-import io.mongock.api.annotations.RollbackExecution;
-import lombok.RequiredArgsConstructor;
-import org.springframework.core.io.ClassPathResource;
+import com.github.cloudyrock.mongock.ChangeLog;
+import com.github.cloudyrock.mongock.ChangeSet;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import ru.otus.hw.dto.AuthorDTO;
-import ru.otus.hw.dto.BookDTO;
+import ru.otus.hw.dto.BookMigrateDTO;
 import ru.otus.hw.dto.GenreDTO;
 import ru.otus.hw.mapper.AuthorMapper;
-import ru.otus.hw.mapper.BookMapper;
 import ru.otus.hw.mapper.GenreMapper;
 import ru.otus.hw.models.Author;
 import ru.otus.hw.models.Book;
@@ -21,58 +17,73 @@ import ru.otus.hw.models.Genre;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
-import java.util.function.Function;
 import java.util.logging.Logger;
 
-@ChangeUnit(id = "init-data", order = "001", author = "Jasur")
-@RequiredArgsConstructor
+@ChangeLog(order = "001")
 public class InitialDataMigration {
 
     private static final Logger LOGGER = Logger.getLogger(InitialDataMigration.class.getName());
 
-    private final MongoTemplate mongoTemplate;
-
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    @Execution
-    public void changeSet() throws IOException {
-        loadAndInsert("data/authors.json", new TypeReference<>() {}, AuthorDTO.class, AuthorMapper::toDocument, Author.class);
-        loadAndInsert("data/genres.json", new TypeReference<>() {}, GenreDTO.class, GenreMapper::toDocument, Genre.class);
-        loadAndInsert("data/books.json", new TypeReference<>() {}, BookDTO.class, BookMapper::toDocument, Book.class);
-
-        LOGGER.info("✅ Data migration executed successfully");
+    @ChangeSet(order = "001", id = "initAuthors", author = "Jasur")
+    public void initAuthors(MongoTemplate mongoTemplate) throws IOException {
+        // Load authors from JSON and save to MongoDB
+        List<AuthorDTO> authorDTOs = readJson("data/authors.json", new TypeReference<>() {
+        });
+        List<Author> authors = authorDTOs.stream()
+                .map(AuthorMapper::toDocument)
+                .toList();
+        authors.forEach(mongoTemplate::save);
+        LOGGER.info("✅ Authors imported successfully: " + authors.size());
     }
 
-    private <D, T> void loadAndInsert(String resourcePath,
-                                      TypeReference<List<D>> typeRef,
-                                      Class<D> dtoClass,
-                                      Function<D, T> mapper,
-                                      Class<T> entityClass) throws IOException {
-        try (InputStream input = new ClassPathResource(resourcePath).getInputStream()) {
-            List<D> dtoList = objectMapper.readValue(input, typeRef);
-            List<T> documents = dtoList.stream().map(mapper).toList();
-            for (T doc : documents) {
-                insertIfNotExists(doc, entityClass);
-            }
-        } catch (IOException e) {
-            LOGGER.severe("❌ Failed to read file " + resourcePath + ": " + e.getMessage());
-            throw e;
+    @ChangeSet(order = "002", id = "initGenres", author = "Jasur")
+    public void initGenres(MongoTemplate mongoTemplate) throws IOException {
+        // Load genres from JSON and save to MongoDB
+        List<GenreDTO> genreDTOs = readJson("data/genres.json", new TypeReference<>() {
+        });
+        List<Genre> genres = genreDTOs.stream()
+                .map(GenreMapper::toDocument)
+                .toList();
+        genres.forEach(mongoTemplate::save);
+        LOGGER.info("✅ Genres imported successfully: " + genres.size());
+    }
+
+    @ChangeSet(order = "003", id = "initBooks", author = "Jasur")
+    public void initBooks(MongoTemplate mongoTemplate) throws IOException {
+        // Load books from JSON and save to MongoDB
+
+        List<BookMigrateDTO> booksDTO = readJson("data/books.json", new TypeReference<>() {
+        });
+        var books = booksDTO.stream()
+                .map(bookDTO -> {
+                    Book book = new Book();
+                    book.setTitle(bookDTO.getTitle());
+                    book.setAuthorId(bookDTO.getAuthorId());
+                    book.setGenreIds(bookDTO.getGenres());
+                    return book;
+                })
+                .toList();
+
+        books.forEach(mongoTemplate::save);
+        LOGGER.info("✅ Books imported successfully: " + books.size());
+    }
+
+    /**
+     * Reads a JSON file from the resources folder and converts it into a List of the given type.
+     *
+     * @param path          the path to the JSON file in resources
+     * @param typeReference the type reference for deserialization
+     * @param <T>           the type of objects to return
+     * @return list of parsed objects
+     * @throws IOException if the file is not found or cannot be read
+     */
+    private <T> List<T> readJson(String path, TypeReference<List<T>> typeReference) throws IOException {
+        InputStream inputStream = getClass().getClassLoader().getResourceAsStream(path);
+        if (inputStream == null) {
+            throw new IllegalStateException("❌ JSON file not found: " + path);
         }
-    }
-
-    private <T> void insertIfNotExists(T document, Class<T> entityClass) {
-        var id = mongoTemplate.getConverter().convertToMongoType(
-                mongoTemplate.getConverter().getMappingContext().getPersistentEntity(entityClass).getIdentifierAccessor(document).getIdentifier());
-
-        if (mongoTemplate.findById(id, entityClass) == null) {
-            mongoTemplate.insert(document);
-        } else {
-            LOGGER.warning(entityClass.getSimpleName() + " with id " + id + " already exists.");
-        }
-    }
-
-    @RollbackExecution
-    public void rollback() {
-        // optional: rollback qilinadigan ishlar
+        return objectMapper.readValue(inputStream, typeReference);
     }
 }

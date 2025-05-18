@@ -3,7 +3,6 @@ package ru.otus.hw.converters;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import ru.otus.hw.dto.BookDTO;
-import ru.otus.hw.models.Book;
 
 import java.util.stream.Collectors;
 

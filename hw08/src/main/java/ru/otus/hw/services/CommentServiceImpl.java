@@ -37,7 +37,7 @@ public class CommentServiceImpl implements CommentService {
         var comment = new Comment();
         comment.setMessage(message);
         if (book.isPresent()) {
-            comment.setBook(book.get());
+            comment.setBookId(bookId);
         } else {
             throw new EntityNotFoundException("Book not found");
         }
@@ -53,7 +53,7 @@ public class CommentServiceImpl implements CommentService {
             comment.setMessage(message);
             var book = bookRepository.findById(bookId);
             if (book.isPresent()) {
-                comment.setBook(book.get());
+                comment.setBookId(bookId);
             } else {
                 throw new EntityNotFoundException("Book not found");
             }

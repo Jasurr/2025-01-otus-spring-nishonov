@@ -1,4 +1,5 @@
 package ru.otus.hw.repositories;
+
 import org.springframework.data.mongodb.repository.Aggregation;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import ru.otus.hw.dto.BookDTO;
@@ -8,21 +9,54 @@ import java.util.List;
 import java.util.Optional;
 
 public interface BookRepository extends MongoRepository<Book, String> {
-
     @Aggregation(pipeline = {
-            "{ $lookup: { from: 'authors', localField: 'author_id', foreignField: '_id', as: 'author' } }",
-            "{ $lookup: { from: 'genres', localField: 'genre_ids', foreignField: '_id', as: 'genres' } }",
+            "{ $lookup: { " +
+                    "from: 'authors', " +
+                    "let: { authorId: '$author_id' }, " +
+                    "pipeline: [ " +
+                    "{ $match: { $expr: { $eq: ['$_id', '$$authorId'] } } }, " +
+                    "{ $project: { id: '$_id', fullName: '$full_name' } } " +
+                    "], " +
+                    "as: 'author' " +
+                    "} }",
+            "{ $lookup: { " +
+                    "from: 'genres', " +
+                    "let: { genreIds: '$genre_ids' }, " +
+                    "pipeline: [ " +
+                    "{ $match: { $expr: { $in: ['$_id', '$$genreIds'] } } }, " +
+                    "{ $project: { id: '$_id', name: 1 } } " +
+                    "], " +
+                    "as: 'genres' " +
+                    "} }",
             "{ $unwind: '$author' }",
-            "{ $project: { _id: 1, title: 1, author: '$author', genres: '$genres' } }"
+            "{ $project: { id: '$_id', title: 1, author: 1, genres: 1 } }"
     })
     List<BookDTO> findAllWithAuthorAndGenres();
 
     @Aggregation(pipeline = {
             "{ $match: { _id: ?0 } }",
-            "{ $lookup: { from: 'authors', localField: 'author_id', foreignField: '_id', as: 'author' } }",
-            "{ $lookup: { from: 'genres', localField: 'genre_ids', foreignField: '_id', as: 'genres' } }",
+            "{ $lookup: { " +
+                    "from: 'authors', " +
+                    "let: { authorId: '$author_id' }, " +
+                    "pipeline: [ " +
+                    "{ $match: { $expr: { $eq: ['$_id', '$$authorId'] } } }, " +
+                    "{ $project: { id: '$_id', fullName: '$full_name' } } " +  // fullName deb o'zgartirdik
+                    "], " +
+                    "as: 'author' " +
+                    "} }",
+            "{ $lookup: { " +
+                    "from: 'genres', " +
+                    "let: { genreIds: '$genre_ids' }, " +
+                    "pipeline: [ " +
+                    "{ $match: { $expr: { $in: ['$_id', '$$genreIds'] } } }, " +
+                    "{ $project: { id: '$_id', name: 1 } } " +
+                    "], " +
+                    "as: 'genres' " +
+                    "} }",
             "{ $unwind: '$author' }",
-            "{ $project: { _id: 1, title: 1, author: '$author', genres: '$genres' } }"
+            "{ $project: { id: '$_id', title: 1, author: 1, genres: 1 } }"
     })
     Optional<BookDTO> findByIdWithAuthorAndGenres(String id);
+
+
 }

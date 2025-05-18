@@ -21,7 +21,8 @@ public class CommentCommands {
                 .map(comment -> commentConverter.commentToString(
                         comment.getId(),
                         comment.getMessage(),
-                        comment.getBook().getId()))
+                        comment.getBookId()
+                ))
                 .orElse("Comment with id %s not found".formatted(id));
     }
 
@@ -31,7 +32,7 @@ public class CommentCommands {
                 .map(comment -> commentConverter.commentToString(
                         comment.getId(),
                         comment.getMessage(),
-                        comment.getBook().getId()))
+                        comment.getBookId()))
                 .collect(Collectors.joining("," + System.lineSeparator()));
     }
 
@@ -41,7 +42,7 @@ public class CommentCommands {
         return commentConverter.commentToString(
                 savedComment.getId(),
                 savedComment.getMessage(),
-                savedComment.getBook().getId());
+                savedComment.getBookId());
     }
 
     @ShellMethod(value = "Update comment", key = "cupd")
@@ -50,7 +51,7 @@ public class CommentCommands {
         return commentConverter.commentToString(
                 updatedComment.getId(),
                 updatedComment.getMessage(),
-                updatedComment.getBook().getId());
+                updatedComment.getBookId());
     }
 
     @ShellMethod(value = "Delete comment by id", key = "cdel")

@@ -1,21 +1,14 @@
 package org.example.mongoktest.migration;
 
-import io.mongock.api.annotations.ChangeUnit;
-import io.mongock.api.annotations.Execution;
-import io.mongock.api.annotations.RollbackExecution;
+import com.github.cloudyrock.mongock.ChangeLog;
+import com.github.cloudyrock.mongock.ChangeSet;
+import org.example.mongoktest.repository.UserRepository;
 
-import java.io.IOException;
-
-@ChangeUnit(id = "init-authors", order = "001", author = "user")
+@ChangeLog(order = "001")
 public class InitialDataMigration {
 
-    @Execution
-    public void execution() throws IOException {
-        // migratsiya logikasi shu yerga yoziladi
-    }
+    @ChangeSet(order = "001", id = "initUsers", author = "chatgpt")
+    public void initUsers(UserRepository userRepository) {
 
-    @RollbackExecution
-    public void rollback() {
-        // optional: rollback qilinadigan ishlar
     }
 }
