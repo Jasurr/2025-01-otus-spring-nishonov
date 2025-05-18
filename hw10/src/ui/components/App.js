@@ -1,0 +1,36 @@
+import React from 'react'
+import {NavLink, Route, Routes} from "react-router";
+import Authors from "./Auhtors";
+import Genres from "./Genres";
+import BookList from "./BookList";
+import {BookForm} from "./BookForm";
+
+export default class App extends React.Component {
+
+    render() {
+        return (
+            <React.Fragment>
+                <h1>Welcome to the Library</h1>
+                <nav>
+                    <NavLink to="/" end>
+                        Home
+                    </NavLink>
+                    <NavLink to="/authors" end>
+                        Authors
+                    </NavLink>
+                    <NavLink to="/genres">Genres</NavLink>
+                </nav>
+                <Routes>
+                    <Route path="/" element={<BookList/>}/>
+                    <Route path="/authors" element={<Authors/>}/>
+                    <Route path="/genres" element={<Genres/>}/>
+                    <Route path="/book/edit/:id" element={<BookForm/>}/>
+                    <Route path={"/book/add"} element={<BookForm/>}/>
+                </Routes>
+                <footer>
+                    &copy; 2025 Library System
+                </footer>
+            </React.Fragment>
+        )
+    }
+};
