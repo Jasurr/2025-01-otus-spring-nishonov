@@ -17,7 +17,7 @@ export default class BookList extends React.Component {
         return (
             <>
                 <div className="top-actions">
-                    <Link to="/book/add" className={"button button-add"}>Add New Book</Link>
+                    <Link to="/book/add-new" className={"button button-add"}>Add New Book</Link>
                 </div>
 
                 <div className="table-container">
@@ -45,7 +45,7 @@ export default class BookList extends React.Component {
                                         ))}
                                     </td>
                                     <td className="action-buttons">
-                                        <a href={`/book/edit/${book.id}`} className="button button-edit">Edit</a>
+                                        <Link to={`/book/edit-book/${book.id}`} className="button button-edit">Edit</Link>
                                         <a href={`/book/delete/${book.id}`} className="button button-delete"
                                            onClick={() => confirm('Are you sure you want to delete this book?')}>Delete</a>
 

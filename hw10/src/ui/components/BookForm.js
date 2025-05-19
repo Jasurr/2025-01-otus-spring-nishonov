@@ -1,69 +1,152 @@
 import React from 'react'
 import {Link} from "react-router";
+import withRouter from "../util/withRouter";
 
-export const BookForm = () => {
-    const [title, setTitle] = React.useState('');
-    const [author, setAuthor] = React.useState('');
-    const [genres, setGenres] = React.useState([]);
-    const [message, setMessage] = React.useState('');
-    const [authors, setAuthors] = React.useState([]);
-    const [genresList, setGenresList] = React.useState([]);
+class BookForm extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            bookId: '',
+            title: '',
+            author: '',
+            genres: [],
+            message: '',
+            authors: [],
+            genresList: []
+        };
+    }
 
-    // Fetch authors and genres from the API
-    React.useEffect(() => {
-        // Fetch authors and genres logic here
-        fetch('/api/authors')
+    componentDidMount() {
+        const { id } = this.props.params;
+
+        console.log("BookID", id)
+        if (id) {
+            this.setState({bookId: id});
+            // Edit mode — fetch book data by ID
+            fetch(`/api/books/${id}`)
+                .then(res => res.json())
+                .then(data => {
+                    console.log('GET_BOOK_BY_ID', data)
+                    this.setState({
+                        title: data.title,
+                        author: data.author.id,
+                        genres: data.genres.map(item => item.id)
+                    });
+                })
+                .catch(err => console.error("Error loading book:", err));
+        }
+        // load authors
+        fetch('/api/v1/authors')
             .then(response => response.json())
-            .then(data => {
-                setAuthors(data.authors);
+            .then(authors => {
+                this.setState({authors});
             })
             .catch(error => console.error('Error fetching authors:', error));
-        fetch('/api/genres')
+        // load genres
+        fetch('/api/v1/genres')
             .then(response => response.json())
-            .then(data => {
-                setGenresList(data.genres);
+            .then(genres => {
+                this.setState({genresList: genres});
             })
             .catch(error => console.error('Error fetching genres:', error));
-    }, []);
+    }
 
-    const handleSubmit = (event) => {
-        event.preventDefault();
-        // Add book logic here
-        setMessage('Book added successfully!');
+    handleChange = (e) => {
+        this.setState({[e.target.id]: e.target.value});
     };
 
-    return (
-        <div className="book-add">
-            <h2>Add a New Book</h2>
-            <form onSubmit={handleSubmit}>
-                <label htmlFor="title">Title</label>
-                <input type="text" id="title" value={title} onChange={(e) => setTitle(e.target.value)}
-                       placeholder="Enter book title" required/>
+    handleGenresChange = (e) => {
+        const selectedGenres = Array.from(e.target.selectedOptions).map(option => option.value);
+        this.setState({genres: selectedGenres});
+    };
 
-                <label htmlFor="author">Author</label>
-                <select id="author" value={author} onChange={(e) => setAuthor(e.target.value)} required>
-                    <option value="">Select an author</option>
-                    {
-                        authors?.map((author) => (
-                        <option key={author.id} value={author.id}>{author.name}</option>
-                    ))}
-                </select>
+    handleSubmit = (e) => {
+        e.preventDefault();
+        const {bookId, title, author, genres} = this.state;
+        const genereIds = genres.map(item => {
+            return {
+                id: item
+            }
+        })
+        const book = {
+            id: bookId,
+            title,
+            author: {
+                id: author
+            },
+            genres: genereIds
+        }
+        fetch(`/api/v1/books/add`, {
+            method: "POST",
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(book)
+        }).then(() => {
+            this.setState({bookId: ''})
+            this.setState({title: ''})
+            this.setState({author: ''})
+            this.setState({genres: ''})
+        });
 
-                <label htmlFor="genres">Genres</label>
-                <select id="genres" value={genres}
-                        onChange={(e) => setGenres([...e.target.selectedOptions].map(option => option.value))} multiple
-                        required>
-                    {genresList.map((genre) => (
-                        <option key={genre.id} value={genre.id}>{genre.name}</option>
-                    ))}
-                </select>
+        this.setState({message: 'Book added successfully!'});
+    };
 
-                <div className="buttons">
-                    <button type="submit">Save</button>
-                    <Link to="/" className={"button-cancel"}>Cancel</Link>
-                </div>
-            </form>
-            {message && <p>{message}</p>}
-        </div>
-    );
+    render() {
+        const {bookId, title, author, genres, message, authors, genresList} = this.state;
+
+        return (
+            <div className="book-add">
+                <h2>Add a New Book</h2>
+                <form onSubmit={this.handleSubmit}>
+                    <label htmlFor="title">Title</label>
+                    <input type="hidden" name="bookId" value={bookId}/>
+                    <input
+                        type="text"
+                        id="title"
+                        value={title}
+                        onChange={this.handleChange}
+                        placeholder="Enter book title"
+                        required
+                    />
+
+                    <label htmlFor="author">Author</label>
+                    <select
+                        id="author"
+                        value={author}
+                        onChange={this.handleChange}
+                        required
+                    >
+                        <option value="">Select an author</option>
+                        {authors.map((author) => (
+                            <option key={author.id} value={author.id}>
+                                {author.fullName}
+                            </option>
+                        ))}
+                    </select>
+
+                    <label htmlFor="genres">Genres</label>
+                    <select
+                        id="genres"
+                        value={genres}
+                        onChange={this.handleGenresChange}
+                        multiple
+                        required
+                    >
+                        {genresList.map((genre) => (
+                            <option key={genre.id} value={genre.id}>
+                                {genre.name}
+                            </option>
+                        ))}
+                    </select>
+
+                    <div className="buttons">
+                        <button type="submit">Save</button>
+                        <Link to="/" className="button-cancel">Cancel</Link>
+                    </div>
+                </form>
+                {message && <p>{message}</p>}
+            </div>
+        );
+    }
 }
+
+export default withRouter(BookForm);

@@ -3,7 +3,7 @@ import {NavLink, Route, Routes} from "react-router";
 import Authors from "./Auhtors";
 import Genres from "./Genres";
 import BookList from "./BookList";
-import {BookForm} from "./BookForm";
+import BookForm from "./BookForm";
 
 export default class App extends React.Component {
 
@@ -24,8 +24,8 @@ export default class App extends React.Component {
                     <Route path="/" element={<BookList/>}/>
                     <Route path="/authors" element={<Authors/>}/>
                     <Route path="/genres" element={<Genres/>}/>
-                    <Route path="/book/edit/:id" element={<BookForm/>}/>
-                    <Route path={"/book/add"} element={<BookForm/>}/>
+                    <Route path="/book/edit-book/:id" element={<BookForm />} />
+                    <Route path={"/book/add-new"} element={<BookForm/>}/>
                 </Routes>
                 <footer>
                     &copy; 2025 Library System
