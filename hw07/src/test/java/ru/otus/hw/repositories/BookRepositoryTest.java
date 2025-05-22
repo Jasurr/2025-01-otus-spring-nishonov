@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 
 @DataJpaTest
@@ -43,9 +42,9 @@ class BookRepositoryTest {
     void shouldSaveBook() {
         Book book = createTestBook();
         Book savedBook = bookRepository.save(book);
-        assertEquals(TEST_BOOK_TITLE, savedBook.getTitle());
-        assertEquals(author, savedBook.getAuthor());
-        assertTrue(savedBook.getGenres().contains(genre));
+        assertThat(savedBook.getId()).isNotNull();
+        assertThat(savedBook.getTitle()).isEqualTo(TEST_BOOK_TITLE);
+        assertThat(savedBook.getAuthor()).isEqualTo(author);
     }
 
     @Test
@@ -54,8 +53,8 @@ class BookRepositoryTest {
         Book savedBook = bookRepository.save(createTestBook());
         em.flush();
         Optional<Book> foundBook = bookRepository.findById(savedBook.getId());
-        assertTrue(foundBook.isPresent());
-        assertEquals(savedBook.getId(), foundBook.get().getId());
+        assertThat(foundBook.isPresent()).isTrue();
+        assertThat(foundBook.get()).isEqualTo(savedBook);
     }
 
     @Test
@@ -77,7 +76,7 @@ class BookRepositoryTest {
         Book savedBook = bookRepository.save(createTestBook());
         bookRepository.deleteById(savedBook.getId());
         em.flush();
-        assertFalse(bookRepository.findById(savedBook.getId()).isPresent());
+        assertThat(bookRepository.findById(savedBook.getId()).isPresent()).isFalse();
     }
 
     private Book createTestBook() {

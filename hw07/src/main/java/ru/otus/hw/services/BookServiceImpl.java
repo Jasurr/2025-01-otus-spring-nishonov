@@ -3,7 +3,9 @@ package ru.otus.hw.services;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.otus.hw.dto.BookDto;
 import ru.otus.hw.exceptions.EntityNotFoundException;
+import ru.otus.hw.mapper.BookMapper;
 import ru.otus.hw.models.Author;
 import ru.otus.hw.models.Book;
 import ru.otus.hw.models.Genre;
@@ -25,27 +27,29 @@ public class BookServiceImpl implements BookService {
     private final BookRepository bookRepository;
 
     @Override
-    public Optional<Book> findById(long id) {
-        return bookRepository.findById(id);
+    public Optional<BookDto> findById(long id) {
+        return bookRepository.findById(id)
+                .map(BookMapper::toDto);
     }
 
     @Transactional(readOnly = true)
     @Override
-    public List<Book> findAll() {
-        var books = bookRepository.findAll();
-        books.forEach(b -> b.getGenres().size());
-        return books;
+    public List<BookDto> findAll() {
+        return bookRepository.findAll()
+                .stream()
+                .map(BookMapper::toDto)
+                .toList();
     }
 
     @Transactional
     @Override
-    public Book insert(String title, long authorId, Set<Long> genresIds) {
+    public BookDto insert(String title, long authorId, Set<Long> genresIds) {
         return save(null, title, authorId, genresIds);
     }
 
     @Transactional
     @Override
-    public Book update(long id, String title, long authorId, Set<Long> genresIds) {
+    public BookDto update(long id, String title, long authorId, Set<Long> genresIds) {
         if (id <= 0) {
             throw new IllegalArgumentException("Book ID must be greater than 0");
         }
@@ -58,7 +62,7 @@ public class BookServiceImpl implements BookService {
         bookRepository.deleteById(id);
     }
 
-    private Book save(Long id, String title, long authorId, Set<Long> genresIds) {
+    private BookDto save(Long id, String title, long authorId, Set<Long> genresIds) {
         validateInput(title, authorId, genresIds);
         validateInput(title, authorId, genresIds);
 
@@ -70,7 +74,7 @@ public class BookServiceImpl implements BookService {
         book.setAuthor(author);
         book.setGenres(genres);
 
-        return bookRepository.save(book);
+        return BookMapper.toDto(bookRepository.save(book));
     }
 
     private Author findAuthor(Long authorId) {

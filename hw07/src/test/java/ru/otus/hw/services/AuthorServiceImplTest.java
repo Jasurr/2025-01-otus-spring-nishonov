@@ -20,7 +20,9 @@ class AuthorServiceImplTest {
     void shouldFindAllAuthors() {
         var authors = authorService.findAll();
         assertThat(authors)
+                .as("Authors should not be null")
                 .isNotNull()
+                .as("Authors should not be empty")
                 .isNotEmpty()
                 .allMatch(author -> author.getFullName() != null && !author.getFullName().isEmpty());
     }

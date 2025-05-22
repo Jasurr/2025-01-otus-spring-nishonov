@@ -7,6 +7,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 
 import static org.assertj.core.api.Assertions.assertThat;
+
 @DataJpaTest
 @Import(GenreServiceImpl.class)
 @DisplayName("Genre Service Tests")

@@ -16,7 +16,6 @@ import ru.otus.hw.models.Genre;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @DataJpaTest
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
@@ -105,14 +104,18 @@ class BookServiceTest {
     @Transactional(readOnly = true)
     protected Author getAuthorById(long authorId) {
         var author = em.find(Author.class, authorId);
-        assertNotNull(author, "Author with ID " + authorId + " not found");
+        assertThat(author)
+                .as("Author with ID " + authorId + " not found")
+                .isNotNull();
         return author;
     }
 
     @Transactional(readOnly = true)
     protected Genre getGenreById(long genreId) {
         var genre = em.find(Genre.class, genreId);
-        assertNotNull(genre, "Genre with ID " + genreId + " not found");
+        assertThat(genre)
+                .as("Genre with ID " + genreId + " not found")
+                .isNotNull();
         return genre;
     }
 }
