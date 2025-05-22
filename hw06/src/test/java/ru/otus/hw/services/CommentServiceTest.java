@@ -15,7 +15,6 @@ import ru.otus.hw.repositories.JpaBookRepository;
 import ru.otus.hw.repositories.JpaCommentRepository;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @DataJpaTest
 @Import({CommentServiceImpl.class, JpaCommentRepository.class, JpaBookRepository.class})
@@ -83,7 +82,7 @@ class CommentServiceTest {
     @DisplayName("Should update comment message")
     void shouldUpdateComment() {
         var savedComment = commentService.insert(COMMENT_MESSAGE, testBook.getId());
-        var updatedComment = commentService.update(savedComment.getId(), UPDATED_COMMENT_MESSAGE, testBook.getId());
+        var updatedComment = commentService.update(savedComment.getId(), UPDATED_COMMENT_MESSAGE);
 
         assertThat(updatedComment)
                 .isNotNull()
@@ -105,7 +104,9 @@ class CommentServiceTest {
     @Transactional(readOnly = true)
     protected Book getBookById(long bookId) {
         var book = em.find(Book.class, bookId);
-        assertNotNull(book, "Book with ID " + bookId + " not found");
+        assertThat(book)
+                .as("Book with ID %d should not be null", bookId)
+                .isNotNull();
         return book;
     }
 }

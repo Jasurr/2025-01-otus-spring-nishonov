@@ -21,9 +21,7 @@ public class JpaBookRepository implements BookRepository {
         EntityGraph<?> entityGraph = em.createEntityGraph("Book.withAuthorOnly");
         TypedQuery<Book> query = em.createQuery("select b from Book b", Book.class);
         query.setHint("javax.persistence.fetchgraph", entityGraph);
-        List<Book> books = query.getResultList();
-        books.forEach(b -> b.getGenres().size()); // trigger SUBSELECT
-        return books;
+        return query.getResultList();
     }
 
     @Override
@@ -37,9 +35,9 @@ public class JpaBookRepository implements BookRepository {
 
     @Override
     public void deleteById(long id) {
-        Book book = em.find(Book.class, id); // Must be managed (attached to the persistence context)
+        Book book = em.find(Book.class, id);
         if (book != null) {
-            em.remove(book); // Entity is removed from database
+            em.remove(book);
         }
     }
 

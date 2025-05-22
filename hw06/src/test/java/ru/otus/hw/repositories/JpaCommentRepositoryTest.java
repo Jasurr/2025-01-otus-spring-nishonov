@@ -10,7 +10,6 @@ import ru.otus.hw.models.Book;
 import ru.otus.hw.models.Comment;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @DataJpaTest
 @Import(JpaCommentRepository.class)
@@ -35,7 +34,7 @@ class JpaCommentRepositoryTest {
         em.flush();
 
         var foundComment = em.find(Comment.class, savedComment.getId());
-        assertNotNull(foundComment.getId());
+        assertThat(foundComment.getId()).isNotNull();
         assertThat(foundComment.getMessage()).isEqualTo(COMMENT_MESSAGE);
         assertThat(foundComment.getBook()).isEqualTo(book);
     }
@@ -81,7 +80,9 @@ class JpaCommentRepositoryTest {
 
     private Book getBookById(long bookId) {
         var book = em.find(Book.class, bookId);
-        assertNotNull(book, "Book with ID " + bookId + " not found");
+        assertThat(book)
+                .as("Book with ID %s not found", bookId)
+                .isNotNull();
         return book;
     }
 

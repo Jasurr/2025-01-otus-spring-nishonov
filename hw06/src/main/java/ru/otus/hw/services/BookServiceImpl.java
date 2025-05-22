@@ -3,6 +3,9 @@ package ru.otus.hw.services;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.otus.hw.dto.AuthorDto;
+import ru.otus.hw.dto.BookDto;
+import ru.otus.hw.dto.GenreDto;
 import ru.otus.hw.exceptions.EntityNotFoundException;
 import ru.otus.hw.models.Author;
 import ru.otus.hw.models.Book;
@@ -26,25 +29,29 @@ public class BookServiceImpl implements BookService {
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<Book> findById(long id) {
-        return bookRepository.findById(id);
+    public Optional<BookDto> findById(long id) {
+        return bookRepository.findById(id)
+                .map(this::toDto);
     }
 
     @Transactional(readOnly = true)
     @Override
-    public List<Book> findAll() {
-        return bookRepository.findAllWithGenres();
+    public List<BookDto> findAll() {
+        return bookRepository.findAllWithGenres()
+                .stream()
+                .map(this::toDto)
+                .toList();
     }
 
     @Transactional
     @Override
-    public Book insert(String title, long authorId, Set<Long> genresIds) {
+    public BookDto insert(String title, long authorId, Set<Long> genresIds) {
         return save(null, title, authorId, genresIds);
     }
 
     @Transactional
     @Override
-    public Book update(long id, String title, long authorId, Set<Long> genresIds) {
+    public BookDto update(long id, String title, long authorId, Set<Long> genresIds) {
         if (id <= 0) {
             throw new IllegalArgumentException("Book ID must be greater than 0");
         }
@@ -57,7 +64,7 @@ public class BookServiceImpl implements BookService {
         bookRepository.deleteById(id);
     }
 
-    Book save(Long id, String title, Long authorId, Set<Long> genresIds) {
+    private BookDto save(Long id, String title, Long authorId, Set<Long> genresIds) {
         validateInput(title, authorId, genresIds);
 
         var author = findAuthor(authorId);
@@ -68,7 +75,7 @@ public class BookServiceImpl implements BookService {
         book.setAuthor(author);
         book.setGenres(genres);
 
-        return bookRepository.save(book);
+        return toDto(bookRepository.save(book));
     }
 
     private Author findAuthor(Long authorId) {
@@ -108,5 +115,16 @@ public class BookServiceImpl implements BookService {
         if (genresIds == null || genresIds.isEmpty()) {
             throw new IllegalArgumentException("Genres IDs must not be null or empty");
         }
+    }
+
+    private BookDto toDto(Book book) {
+        return new BookDto(
+                book.getId(),
+                book.getTitle(),
+                new AuthorDto(book.getAuthor().getId(), book.getAuthor().getFullName()),
+                book.getGenres().stream()
+                        .map(genre -> new GenreDto(genre.getId(), genre.getName()))
+                        .toList()
+        );
     }
 }

@@ -3,6 +3,7 @@ package ru.otus.hw.services;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.otus.hw.dto.CommentDto;
 import ru.otus.hw.exceptions.EntityNotFoundException;
 import ru.otus.hw.models.Comment;
 import ru.otus.hw.repositories.BookRepository;
@@ -20,19 +21,23 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<Comment> findById(long id) {
-        return commentRepository.findById(id);
+    public Optional<CommentDto> findById(long id) {
+        return commentRepository.findById(id)
+                .map(this::toDto);
     }
 
     @Transactional(readOnly = true)
     @Override
-    public List<Comment> findByBookId(long bookId) {
-        return commentRepository.findByBookId(bookId);
+    public List<CommentDto> findByBookId(long bookId) {
+        return commentRepository.findByBookId(bookId)
+                .stream()
+                .map(this::toDto)
+                .toList();
     }
 
     @Transactional
     @Override
-    public Comment insert(String message, long bookId) {
+    public CommentDto insert(String message, long bookId) {
         var book = bookRepository.findById(bookId);
         var comment = new Comment();
         comment.setMessage(message);
@@ -41,23 +46,17 @@ public class CommentServiceImpl implements CommentService {
         } else {
             throw new EntityNotFoundException("Book not found");
         }
-        return commentRepository.save(comment);
+        return toDto(commentRepository.save(comment));
     }
 
     @Override
     @Transactional
-    public Comment update(long id, String message, long bookId) {
-        var comments = commentRepository.findById(id);
-        if (comments.isPresent()) {
-            var comment = comments.get();
+    public CommentDto update(long id, String message) {
+        var commentOptional = commentRepository.findById(id);
+        if (commentOptional.isPresent()) {
+            var comment = commentOptional.get();
             comment.setMessage(message);
-            var book = bookRepository.findById(bookId);
-            if (book.isPresent()) {
-                comment.setBook(book.get());
-            } else {
-                throw new EntityNotFoundException("Book not found");
-            }
-            return commentRepository.save(comment);
+            return toDto(commentRepository.save(comment));
         } else {
             throw new EntityNotFoundException("Comment not found");
         }
@@ -67,5 +66,13 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public void deleteById(long id) {
         commentRepository.deleteById(id);
+    }
+
+    private CommentDto toDto(Comment comment) {
+        var dto = new CommentDto();
+        dto.setId(comment.getId());
+        dto.setMessage(comment.getMessage());
+        dto.setBook(comment.getBook());
+        return dto;
     }
 }

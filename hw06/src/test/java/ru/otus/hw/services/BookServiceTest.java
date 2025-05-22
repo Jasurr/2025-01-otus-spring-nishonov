@@ -11,7 +11,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import ru.otus.hw.models.Author;
-import ru.otus.hw.models.Book;
 import ru.otus.hw.models.Genre;
 import ru.otus.hw.repositories.JpaAuthorRepository;
 import ru.otus.hw.repositories.JpaBookRepository;
@@ -20,7 +19,6 @@ import ru.otus.hw.repositories.JpaGenreRepository;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @DataJpaTest
 @Import({BookServiceImpl.class, JpaBookRepository.class, JpaAuthorRepository.class, JpaGenreRepository.class})
@@ -68,6 +66,9 @@ class BookServiceTest {
     void shouldFindAllBooks() {
         var books = bookService.findAll();
         assertThat(books)
+                .as("Books list should not be null")
+                .isNotNull()
+                .as("Books list should not be empty")
                 .isNotEmpty()
                 .allMatch(book -> book.getAuthor() != null && book.getGenres() != null);
     }
@@ -110,14 +111,18 @@ class BookServiceTest {
     @Transactional(readOnly = true)
     protected Author getAuthorById(long authorId) {
         var author = em.find(Author.class, authorId);
-        assertNotNull(author, "Author with ID " + authorId + " not found");
+        assertThat(author)
+                .as("Author with ID %d should not be null", authorId)
+                .isNotNull();
         return author;
     }
 
     @Transactional(readOnly = true)
     protected Genre getGenreById(long genreId) {
         var genre = em.find(Genre.class, genreId);
-        assertNotNull(genre, "Genre with ID " + genreId + " not found");
+        assertThat(genre)
+                .as("Genre with ID %d should not be null", genreId)
+                .isNotNull();
         return genre;
     }
 }

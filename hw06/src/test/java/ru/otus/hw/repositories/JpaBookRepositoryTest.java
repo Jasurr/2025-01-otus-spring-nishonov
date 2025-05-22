@@ -13,7 +13,6 @@ import ru.otus.hw.models.Genre;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
 @Import(JpaBookRepository.class)
@@ -70,10 +69,10 @@ class JpaBookRepositoryTest {
         var book = createBook("New Book", author, genre);
         var savedBook = jpaBookRepository.save(book);
 
-        assertNotNull(savedBook.getId());
-        assertEquals(book.getTitle(), savedBook.getTitle());
-        assertEquals(book.getAuthor(), savedBook.getAuthor());
-        assertEquals(book.getGenres(), savedBook.getGenres());
+        assertThat(savedBook.getId()).isNotNull();
+        assertThat(book.getTitle()).isEqualTo(savedBook.getTitle());
+        assertThat(book.getAuthor()).isEqualTo(savedBook.getAuthor());
+        assertThat(book.getGenres()).isEqualTo(savedBook.getGenres());
     }
 
     @Test
@@ -106,6 +105,6 @@ class JpaBookRepositoryTest {
         em.flush();
         em.clear();
         var deletedBook = em.find(Book.class, book.getId());
-        assertNull(deletedBook);
+        assertThat(deletedBook).isNull();
     }
 }
