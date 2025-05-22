@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.otus.hw.dto.CommentDto;
 import ru.otus.hw.exceptions.EntityNotFoundException;
+import ru.otus.hw.mapper.CommentMapper;
 import ru.otus.hw.models.Comment;
 import ru.otus.hw.repositories.BookRepository;
 import ru.otus.hw.repositories.CommentRepository;
@@ -23,7 +24,7 @@ public class CommentServiceImpl implements CommentService {
     @Transactional(readOnly = true)
     public Optional<CommentDto> findById(long id) {
         return commentRepository.findById(id)
-                .map(this::toDto);
+                .map(CommentMapper::toDto);
     }
 
     @Transactional(readOnly = true)
@@ -31,7 +32,7 @@ public class CommentServiceImpl implements CommentService {
     public List<CommentDto> findByBookId(long bookId) {
         return commentRepository.findByBookId(bookId)
                 .stream()
-                .map(this::toDto)
+                .map(CommentMapper::toDto)
                 .toList();
     }
 
@@ -46,7 +47,7 @@ public class CommentServiceImpl implements CommentService {
         } else {
             throw new EntityNotFoundException("Book not found");
         }
-        return toDto(commentRepository.save(comment));
+        return CommentMapper.toDto(commentRepository.save(comment));
     }
 
     @Override
@@ -56,7 +57,7 @@ public class CommentServiceImpl implements CommentService {
         if (commentOptional.isPresent()) {
             var comment = commentOptional.get();
             comment.setMessage(message);
-            return toDto(commentRepository.save(comment));
+            return CommentMapper.toDto(commentRepository.save(comment));
         } else {
             throw new EntityNotFoundException("Comment not found");
         }
@@ -68,11 +69,5 @@ public class CommentServiceImpl implements CommentService {
         commentRepository.deleteById(id);
     }
 
-    private CommentDto toDto(Comment comment) {
-        var dto = new CommentDto();
-        dto.setId(comment.getId());
-        dto.setMessage(comment.getMessage());
-        dto.setBook(comment.getBook());
-        return dto;
-    }
+
 }

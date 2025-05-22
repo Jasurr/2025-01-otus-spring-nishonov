@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import ru.otus.hw.models.Book;
 
 @Getter
 @Setter
@@ -16,5 +15,5 @@ public class CommentDto {
 
     private String message;
 
-    private Book book;
+    private BookDto book;
 }

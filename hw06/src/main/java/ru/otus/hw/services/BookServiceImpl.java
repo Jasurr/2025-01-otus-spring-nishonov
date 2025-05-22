@@ -3,10 +3,9 @@ package ru.otus.hw.services;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.otus.hw.dto.AuthorDto;
 import ru.otus.hw.dto.BookDto;
-import ru.otus.hw.dto.GenreDto;
 import ru.otus.hw.exceptions.EntityNotFoundException;
+import ru.otus.hw.mapper.BookMapper;
 import ru.otus.hw.models.Author;
 import ru.otus.hw.models.Book;
 import ru.otus.hw.models.Genre;
@@ -31,7 +30,7 @@ public class BookServiceImpl implements BookService {
     @Transactional(readOnly = true)
     public Optional<BookDto> findById(long id) {
         return bookRepository.findById(id)
-                .map(this::toDto);
+                .map(BookMapper::toDto);
     }
 
     @Transactional(readOnly = true)
@@ -39,7 +38,7 @@ public class BookServiceImpl implements BookService {
     public List<BookDto> findAll() {
         return bookRepository.findAllWithGenres()
                 .stream()
-                .map(this::toDto)
+                .map(BookMapper::toDto)
                 .toList();
     }
 
@@ -75,7 +74,7 @@ public class BookServiceImpl implements BookService {
         book.setAuthor(author);
         book.setGenres(genres);
 
-        return toDto(bookRepository.save(book));
+        return BookMapper.toDto(bookRepository.save(book));
     }
 
     private Author findAuthor(Long authorId) {
@@ -115,16 +114,5 @@ public class BookServiceImpl implements BookService {
         if (genresIds == null || genresIds.isEmpty()) {
             throw new IllegalArgumentException("Genres IDs must not be null or empty");
         }
-    }
-
-    private BookDto toDto(Book book) {
-        return new BookDto(
-                book.getId(),
-                book.getTitle(),
-                new AuthorDto(book.getAuthor().getId(), book.getAuthor().getFullName()),
-                book.getGenres().stream()
-                        .map(genre -> new GenreDto(genre.getId(), genre.getName()))
-                        .toList()
-        );
     }
 }
