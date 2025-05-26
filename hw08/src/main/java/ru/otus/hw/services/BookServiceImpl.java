@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.otus.hw.dto.BookDTO;
 import ru.otus.hw.exceptions.EntityNotFoundException;
+import ru.otus.hw.mapper.BookMapper;
 import ru.otus.hw.models.Book;
 import ru.otus.hw.repositories.AuthorRepository;
 import ru.otus.hw.repositories.BookRepository;
@@ -25,15 +26,19 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public Optional<BookDTO> findById(String id) {
-        return bookRepository.findByIdWithAuthorAndGenres(id);
+        return null;
+//        return bookRepository.findByIdWithAuthorAndGenres(id)
+//                .map(BookMapper::toDTO);
     }
 
     @Transactional(readOnly = true)
     @Override
     public List<BookDTO> findAll() {
-        return bookRepository.findAllWithAuthorAndGenres()
-                .stream()
-                .toList();
+        return null;
+//        return bookRepository.findAllWithAuthorAndGenres()
+//                .stream()
+//                .map(BookMapper::toDTO)
+//                .toList();
     }
 
     @Transactional
@@ -76,11 +81,15 @@ public class BookServiceImpl implements BookService {
                 .orElseThrow(() -> new EntityNotFoundException("Book with id %s not found".formatted(id)));
 
         book.setTitle(title);
-        book.setAuthorId(authorId);
-        book.setGenreIds(List.copyOf(genresIds)); // Set ni List ga aylantirish
+
+//        book.setAuthorId(authorId);
+//        book.setGenreIds(List.copyOf(genresIds)); // Set ni List ga aylantirish
+        book.setAuthor(authorRepository.findById(authorId)
+                .orElseThrow(() -> new EntityNotFoundException("Author with id %s not found".formatted(authorId))));
+
         bookRepository.save(book);
-        return bookRepository.findByIdWithAuthorAndGenres(book.getId())
-                .orElseThrow(() -> new EntityNotFoundException("Book with id %s not found".formatted(book.getId())));
+
+        return BookMapper.toDTO(book);
     }
 
     private void validateInputs(String id, String title, String authorId, Set<String> genresIds) {

@@ -60,8 +60,8 @@ public class InitialDataMigration {
                 .map(bookDTO -> {
                     Book book = new Book();
                     book.setTitle(bookDTO.getTitle());
-                    book.setAuthorId(bookDTO.getAuthorId());
-                    book.setGenreIds(bookDTO.getGenres());
+//                    book.setAuthorId(bookDTO.getAuthorId());
+//                    book.setGenreIds(bookDTO.getGenres());
                     return book;
                 })
                 .toList();
