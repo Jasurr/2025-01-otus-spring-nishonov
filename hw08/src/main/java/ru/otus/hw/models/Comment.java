@@ -23,5 +23,5 @@ public class Comment {
     private String message;
 
     @DBRef
-    private String bookId;
+    private Book book;
 }

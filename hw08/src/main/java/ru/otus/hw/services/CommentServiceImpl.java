@@ -3,7 +3,9 @@ package ru.otus.hw.services;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.otus.hw.dto.CommentDto;
 import ru.otus.hw.exceptions.EntityNotFoundException;
+import ru.otus.hw.mapper.CommentMapper;
 import ru.otus.hw.models.Comment;
 import ru.otus.hw.repositories.BookRepository;
 import ru.otus.hw.repositories.CommentRepository;
@@ -17,6 +19,8 @@ public class CommentServiceImpl implements CommentService {
     private final CommentRepository commentRepository;
 
     private final BookRepository bookRepository;
+
+    private final CommentMapper commentMapper;
 
     @Override
     @Transactional(readOnly = true)
@@ -37,7 +41,7 @@ public class CommentServiceImpl implements CommentService {
         var comment = new Comment();
         comment.setMessage(message);
         if (book.isPresent()) {
-            comment.setBookId(bookId);
+            comment.setBook(book.get());
         } else {
             throw new EntityNotFoundException("Book not found");
         }
@@ -46,21 +50,13 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     @Transactional
-    public Comment update(String id, String message, String bookId) {
-        var comments = commentRepository.findById(id);
-        if (comments.isPresent()) {
-            var comment = comments.get();
-            comment.setMessage(message);
-            var book = bookRepository.findById(bookId);
-            if (book.isPresent()) {
-                comment.setBookId(bookId);
-            } else {
-                throw new EntityNotFoundException("Book not found");
-            }
-            return commentRepository.save(comment);
-        } else {
-            throw new EntityNotFoundException("Comment not found");
-        }
+    public CommentDto update(String id, String message, String bookId) {
+        return commentRepository.findById(id)
+                .map(comment -> {
+                    comment.setMessage(message);
+                    return commentMapper.toDto(commentRepository.save(comment));
+                })
+                .orElseThrow(() -> new EntityNotFoundException("Comment not found"));
     }
 
     @Transactional

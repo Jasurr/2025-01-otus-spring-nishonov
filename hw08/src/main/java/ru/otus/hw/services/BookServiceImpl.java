@@ -3,7 +3,7 @@ package ru.otus.hw.services;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.otus.hw.dto.BookDTO;
+import ru.otus.hw.dto.BookDto;
 import ru.otus.hw.exceptions.EntityNotFoundException;
 import ru.otus.hw.mapper.BookMapper;
 import ru.otus.hw.models.Book;
@@ -25,31 +25,31 @@ public class BookServiceImpl implements BookService {
     private final BookRepository bookRepository;
 
     @Override
-    public Optional<BookDTO> findById(String id) {
+    public Optional<BookDto> findById(String id) {
         return null;
+
 //        return bookRepository.findByIdWithAuthorAndGenres(id)
 //                .map(BookMapper::toDTO);
     }
 
     @Transactional(readOnly = true)
     @Override
-    public List<BookDTO> findAll() {
-        return null;
-//        return bookRepository.findAllWithAuthorAndGenres()
-//                .stream()
-//                .map(BookMapper::toDTO)
-//                .toList();
+    public List<BookDto> findAll() {
+        return bookRepository.findAll()
+                .stream()
+                .map(BookMapper::toDTO)
+                .toList();
     }
 
     @Transactional
     @Override
-    public BookDTO insert(String title, String authorId, Set<String> genresIds) {
+    public BookDto insert(String title, String authorId, Set<String> genresIds) {
         return save(null, title, authorId, genresIds);
     }
 
     @Transactional
     @Override
-    public BookDTO update(String id, String title, String authorId, Set<String> genresIds) {
+    public BookDto update(String id, String title, String authorId, Set<String> genresIds) {
         if (id == null || id.trim().isEmpty()) {
             throw new IllegalArgumentException("Book ID must be greater than 0");
         }
@@ -62,7 +62,7 @@ public class BookServiceImpl implements BookService {
         bookRepository.deleteById(id);
     }
 
-    public BookDTO save(String id, String title, String authorId, Set<String> genresIds) {
+    public BookDto save(String id, String title, String authorId, Set<String> genresIds) {
         validateInputs(id, title, authorId, genresIds);
 
         // Muallifni tekshirish

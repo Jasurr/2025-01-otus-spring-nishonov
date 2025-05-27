@@ -11,12 +11,12 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class BookDTO {
+public class BookDto {
     private String id;
 
     private String title;
 
-    private AuthorDTO author;
+    private AuthorDto author;
 
-    private List<GenreDTO> genres;
+    private List<GenreDto> genres;
 }

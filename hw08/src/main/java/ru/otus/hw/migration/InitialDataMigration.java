@@ -4,10 +4,11 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.cloudyrock.mongock.ChangeLog;
 import com.github.cloudyrock.mongock.ChangeSet;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import ru.otus.hw.dto.AuthorDTO;
-import ru.otus.hw.dto.BookMigrateDTO;
-import ru.otus.hw.dto.GenreDTO;
+import ru.otus.hw.dto.AuthorDto;
+import ru.otus.hw.dto.BookMigrateDto;
+import ru.otus.hw.dto.GenreDto;
 import ru.otus.hw.mapper.AuthorMapper;
 import ru.otus.hw.mapper.GenreMapper;
 import ru.otus.hw.models.Author;
@@ -26,13 +27,14 @@ public class InitialDataMigration {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
+
     @ChangeSet(order = "001", id = "initAuthors", author = "Jasur")
     public void initAuthors(MongoTemplate mongoTemplate) throws IOException {
         // Load authors from JSON and save to MongoDB
-        List<AuthorDTO> authorDTOs = readJson("data/authors.json", new TypeReference<>() {
+        List<AuthorDto> authorDTOs = readJson("data/authors.json", new TypeReference<>() {
         });
         List<Author> authors = authorDTOs.stream()
-                .map(AuthorMapper::toDocument)
+                .map(author -> new Author(author.id(), author.fullName()))
                 .toList();
         authors.forEach(mongoTemplate::save);
         LOGGER.info("✅ Authors imported successfully: " + authors.size());
@@ -41,7 +43,7 @@ public class InitialDataMigration {
     @ChangeSet(order = "002", id = "initGenres", author = "Jasur")
     public void initGenres(MongoTemplate mongoTemplate) throws IOException {
         // Load genres from JSON and save to MongoDB
-        List<GenreDTO> genreDTOs = readJson("data/genres.json", new TypeReference<>() {
+        List<GenreDto> genreDTOs = readJson("data/genres.json", new TypeReference<>() {
         });
         List<Genre> genres = genreDTOs.stream()
                 .map(GenreMapper::toDocument)
@@ -54,12 +56,12 @@ public class InitialDataMigration {
     public void initBooks(MongoTemplate mongoTemplate) throws IOException {
         // Load books from JSON and save to MongoDB
 
-        List<BookMigrateDTO> booksDTO = readJson("data/books.json", new TypeReference<>() {
+        List<BookMigrateDto> booksDTO = readJson("data/books.json", new TypeReference<>() {
         });
         var books = booksDTO.stream()
                 .map(bookDTO -> {
                     Book book = new Book();
-                    book.setTitle(bookDTO.getTitle());
+                    book.setTitle(bookDTO.title());
 //                    book.setAuthorId(bookDTO.getAuthorId());
 //                    book.setGenreIds(bookDTO.getGenres());
                     return book;

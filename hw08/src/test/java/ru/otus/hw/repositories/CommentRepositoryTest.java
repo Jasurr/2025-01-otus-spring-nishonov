@@ -42,7 +42,7 @@ public class CommentRepositoryTest {
         Comment savedComment = commentRepository.save(comment);
         assertThat(savedComment.getId()).isNotNull();
         assertThat(savedComment.getMessage()).isEqualTo(TEST_COMMENT_MESSAGE);
-        assertThat(savedComment.getBookId()).isEqualTo(book.getId());
+        assertThat(savedComment.getBook()).isEqualTo(book.getId());
     }
 
     @Test
@@ -69,7 +69,7 @@ public class CommentRepositoryTest {
     private Comment createTestComment() {
         Comment comment = new Comment();
         comment.setMessage(TEST_COMMENT_MESSAGE);
-        comment.setBookId(book.getId());
+        comment.setBook(book.getId());
         return comment;
     }
 }

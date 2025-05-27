@@ -1,5 +1,6 @@
 package ru.otus.hw.services;
 
+import ru.otus.hw.dto.CommentDto;
 import ru.otus.hw.models.Comment;
 
 import java.util.List;
@@ -13,7 +14,7 @@ public interface CommentService {
 
     Comment insert(String message, String bookId);
 
-    Comment update(String id, String message, String bookId);
+    CommentDto update(String id, String message, String bookId);
 
     void deleteById(String id);
 }

@@ -55,7 +55,7 @@ class CommentServiceTest {
         assertThat(comments)
                 .isNotEmpty()
                 .allMatch(c -> c.getMessage() != null && !c.getMessage().isBlank())
-                .allMatch(c -> c.getBookId().equals(testBook.getId()))
+                .allMatch(c -> c.getBook().equals(testBook.getId()))
                 .anyMatch(c -> c.getId().equals(savedComment.getId()) && c.getMessage().equals(COMMENT_MESSAGE));
     }
 

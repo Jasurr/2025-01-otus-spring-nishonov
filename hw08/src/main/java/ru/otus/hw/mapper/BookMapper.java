@@ -1,15 +1,19 @@
 package ru.otus.hw.mapper;
 
-import ru.otus.hw.dto.BookDTO;
+import ru.otus.hw.dto.AuthorDto;
+import ru.otus.hw.dto.BookDto;
 import ru.otus.hw.models.Book;
 
 public class BookMapper {
 
-    public static BookDTO toDTO(Book book) {
-        return new BookDTO(
+    public static BookDto toDTO(Book book) {
+        return new BookDto(
                 book.getId(),
                 book.getTitle(),
-                AuthorMapper.toDTO(book.getAuthor()),
+                new AuthorDto(
+                        book.getAuthor().getId(),
+                        book.getAuthor().getFullName()
+                ),
                 book.getGenres().stream()
                         .map(GenreMapper::toDTO)
                         .toList()

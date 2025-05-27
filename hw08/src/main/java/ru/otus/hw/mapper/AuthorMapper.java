@@ -1,14 +1,16 @@
 package ru.otus.hw.mapper;
 
-import ru.otus.hw.dto.AuthorDTO;
+import org.springframework.stereotype.Component;
+import ru.otus.hw.dto.AuthorDto;
 import ru.otus.hw.models.Author;
 
+@Component
 public class AuthorMapper {
-    public static AuthorDTO toDTO(Author author) {
-        return new AuthorDTO(author.getId(), author.getFullName());
+    public AuthorDto toDTO(Author author) {
+        return new AuthorDto(author.getId(), author.getFullName());
     }
 
-    public static Author toDocument(AuthorDTO authorDTO) {
-        return new Author(authorDTO.getId(), authorDTO.getFullName());
+    public Author toDocument(AuthorDto authorDTO) {
+        return new Author(authorDTO.id(), authorDTO.fullName());
     }
 }

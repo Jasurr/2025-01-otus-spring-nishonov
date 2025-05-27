@@ -5,9 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.cloudyrock.mongock.ChangeLog;
 import com.github.cloudyrock.mongock.ChangeSet;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import ru.otus.hw.dto.AuthorDTO;
-import ru.otus.hw.dto.GenreDTO;
-import ru.otus.hw.dto.BookMigrateDTO;
+import ru.otus.hw.dto.AuthorDto;
+import ru.otus.hw.dto.GenreDto;
+import ru.otus.hw.dto.BookMigrateDto;
 import ru.otus.hw.mapper.AuthorMapper;
 import ru.otus.hw.mapper.GenreMapper;
 import ru.otus.hw.models.Author;
@@ -25,7 +25,7 @@ public class TestDataMigration {
 
     @ChangeSet(order = "001", id = "testAuthors", author = "test")
     public void initTestAuthors(MongoTemplate mongoTemplate) throws IOException {
-        List<AuthorDTO> authorDTOs = readJson("data/test-authors.json", new TypeReference<>() {
+        List<AuthorDto> authorDTOs = readJson("data/test-authors.json", new TypeReference<>() {
         });
         List<Author> authors = authorDTOs.stream().map(AuthorMapper::toDocument).toList();
         authors.forEach(mongoTemplate::save);
@@ -33,7 +33,7 @@ public class TestDataMigration {
 
     @ChangeSet(order = "002", id = "testGenres", author = "test")
     public void initTestGenres(MongoTemplate mongoTemplate) throws IOException {
-        List<GenreDTO> genreDTOs = readJson("data/test-genres.json", new TypeReference<>() {
+        List<GenreDto> genreDTOs = readJson("data/test-genres.json", new TypeReference<>() {
         });
         List<Genre> genres = genreDTOs.stream().map(GenreMapper::toDocument).toList();
         genres.forEach(mongoTemplate::save);
@@ -41,7 +41,7 @@ public class TestDataMigration {
 
     @ChangeSet(order = "003", id = "testBooks", author = "test")
     public void initTestBooks(MongoTemplate mongoTemplate) throws IOException {
-        List<BookMigrateDTO> booksDTO = readJson("data/test-books.json", new TypeReference<>() {
+        List<BookMigrateDto> booksDTO = readJson("data/test-books.json", new TypeReference<>() {
         });
         List<Book> books = booksDTO.stream().map(dto -> {
             Book book = new Book();

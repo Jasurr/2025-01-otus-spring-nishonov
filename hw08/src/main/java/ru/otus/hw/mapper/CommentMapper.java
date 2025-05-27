@@ -1,22 +1,15 @@
 package ru.otus.hw.mapper;
 
-import ru.otus.hw.dto.CommentDTO;
+import org.springframework.stereotype.Component;
+import ru.otus.hw.dto.CommentDto;
 import ru.otus.hw.models.Comment;
 
+@Component
 public class CommentMapper {
-
-    public static CommentDTO toDTO(Comment comment) {
-        return new CommentDTO(comment.getId(),
+    public CommentDto toDto(Comment comment) {
+        return new CommentDto(comment.getId(),
                 comment.getMessage(),
-                comment.getBookId()
-        );
-    }
-
-    public static Comment toDocument(CommentDTO commentDTO) {
-        return new Comment(
-                commentDTO.getId(),
-                commentDTO.getMessage(),
-                commentDTO.getBookId()
+                comment.getBook() != null ? BookMapper.toDTO(comment.getBook()) : null
         );
     }
 }
