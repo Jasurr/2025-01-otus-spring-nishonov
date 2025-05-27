@@ -26,10 +26,12 @@ public class BookServiceImpl implements BookService {
 
     private final BookRepository bookRepository;
 
+    private final BookMapper bookMapper;
+
     @Override
     public Optional<BookDto> findById(long id) {
         return bookRepository.findById(id)
-                .map(BookMapper::toDto);
+                .map(bookMapper::toDto);
     }
 
     @Transactional(readOnly = true)
@@ -37,7 +39,7 @@ public class BookServiceImpl implements BookService {
     public List<BookDto> findAll() {
         return bookRepository.findAll()
                 .stream()
-                .map(BookMapper::toDto)
+                .map(bookMapper::toDto)
                 .toList();
     }
 
@@ -74,7 +76,7 @@ public class BookServiceImpl implements BookService {
         book.setAuthor(author);
         book.setGenres(genres);
 
-        return BookMapper.toDto(bookRepository.save(book));
+        return bookMapper.toDto(bookRepository.save(book));
     }
 
     private Author findAuthor(Long authorId) {
