@@ -13,11 +13,13 @@ import java.util.List;
 public class GenreServiceImpl implements GenreService {
     private final GenreRepository genreRepository;
 
+    private final GenreMapper genreMapper;
+
     @Override
     public List<GenreDto> findAll() {
         return genreRepository.findAll()
                 .stream()
-                .map(GenreMapper::toDTO)
+                .map(genreMapper::toDto)
                 .toList();
     }
 }

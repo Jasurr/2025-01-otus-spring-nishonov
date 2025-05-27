@@ -47,8 +47,8 @@ public class BookRepositoryTest {
         Book book = createTestBook();
         Book savedBook = bookRepository.save(book);
         assertEquals(TEST_BOOK_TITLE, savedBook.getTitle());
-        assertEquals(author.getId(), savedBook.getAuthorId());
-        assertTrue(savedBook.getGenreIds().contains(genre.getId()));
+        assertEquals(author.getId(), savedBook.getAuthor());
+        assertTrue(savedBook.getGenres().contains(genre.getId()));
     }
 
     @Test
@@ -68,8 +68,8 @@ public class BookRepositoryTest {
         assertThat(books)
                 .isNotEmpty()
                 .allMatch(b -> b.getTitle() != null && !b.getTitle().isEmpty())
-                .allMatch(b -> b.getAuthorId() != null && !b.getAuthorId().isEmpty())
-                .allMatch(b -> !b.getGenreIds().isEmpty());
+                .allMatch(b -> b.getAuthor() != null && !b.getAuthor().getId().isEmpty())
+                .allMatch(b -> !b.getGenres().isEmpty());
     }
 
     @Test
@@ -83,8 +83,8 @@ public class BookRepositoryTest {
     private Book createTestBook() {
         Book book = new Book();
         book.setTitle("Test Book");
-        book.setAuthorId(author.getId());
-        book.setGenreIds(List.of(genre.getId()));
+        book.setAuthor(new Author(author.getId(), author.getFullName()));
+        book.setGenres(List.of(new Genre(genre.getId(), genre.getName())));
         return book;
     }
 }

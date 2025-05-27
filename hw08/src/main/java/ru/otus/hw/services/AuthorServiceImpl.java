@@ -19,7 +19,7 @@ public class AuthorServiceImpl implements AuthorService {
     public List<AuthorDto> findAll() {
         return authorRepository.findAll()
                 .stream()
-                .map(authorMapper::toDTO)
+                .map(authorMapper::toDto)
                 .toList();
     }
 }

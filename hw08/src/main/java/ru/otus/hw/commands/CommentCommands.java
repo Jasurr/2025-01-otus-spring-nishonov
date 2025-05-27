@@ -19,8 +19,8 @@ public class CommentCommands {
     public String findCommentById(String id) {
         return commentService.findById(id)
                 .map(comment -> commentConverter.commentToString(
-                        comment.getId(),
-                        comment.getMessage()
+                        comment.id(),
+                        comment.message()
                 ))
                 .orElse("Comment with id %s not found".formatted(id));
     }
@@ -29,8 +29,8 @@ public class CommentCommands {
     public String findCommentByBookId(String bookId) {
         return commentService.findByBookId(bookId).stream()
                 .map(comment -> commentConverter.commentToString(
-                        comment.getId(),
-                        comment.getMessage()))
+                        comment.id(),
+                        comment.message()))
                 .collect(Collectors.joining("," + System.lineSeparator()));
     }
 
@@ -38,19 +38,19 @@ public class CommentCommands {
     public String insertComment(String message, String bookId) {
         var savedComment = commentService.insert(message, bookId);
         return commentConverter.commentToString(
-                savedComment.getId(),
-                savedComment.getMessage(),
-                savedComment.getBook().getId()
+                savedComment.id(),
+                savedComment.message(),
+                savedComment.book().id()
         );
     }
 
     @ShellMethod(value = "Update comment", key = "cupd")
-    public String updateComment(String id, String message, String bookId) {
-        var updatedComment = commentService.update(id, message, bookId);
+    public String updateComment(String id, String message) {
+        var updatedComment = commentService.update(id, message);
         return commentConverter.commentToString(
                 updatedComment.id(),
                 updatedComment.message(),
-                updatedComment.book().getId()
+                updatedComment.book().id()
         );
     }
 

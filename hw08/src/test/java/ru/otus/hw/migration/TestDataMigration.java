@@ -6,8 +6,8 @@ import com.github.cloudyrock.mongock.ChangeLog;
 import com.github.cloudyrock.mongock.ChangeSet;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import ru.otus.hw.dto.AuthorDto;
+import ru.otus.hw.dto.BookDto;
 import ru.otus.hw.dto.GenreDto;
-import ru.otus.hw.dto.BookMigrateDto;
 import ru.otus.hw.mapper.AuthorMapper;
 import ru.otus.hw.mapper.GenreMapper;
 import ru.otus.hw.models.Author;
@@ -27,7 +27,7 @@ public class TestDataMigration {
     public void initTestAuthors(MongoTemplate mongoTemplate) throws IOException {
         List<AuthorDto> authorDTOs = readJson("data/test-authors.json", new TypeReference<>() {
         });
-        List<Author> authors = authorDTOs.stream().map(AuthorMapper::toDocument).toList();
+        List<Author> authors = authorDTOs.stream().map(author -> new Author(author.id(), author.fullName())).toList();
         authors.forEach(mongoTemplate::save);
     }
 
@@ -35,19 +35,21 @@ public class TestDataMigration {
     public void initTestGenres(MongoTemplate mongoTemplate) throws IOException {
         List<GenreDto> genreDTOs = readJson("data/test-genres.json", new TypeReference<>() {
         });
-        List<Genre> genres = genreDTOs.stream().map(GenreMapper::toDocument).toList();
+        List<Genre> genres = genreDTOs.stream().map(genre -> new Genre(genre.id(), genre.name())).toList();
         genres.forEach(mongoTemplate::save);
     }
 
     @ChangeSet(order = "003", id = "testBooks", author = "test")
     public void initTestBooks(MongoTemplate mongoTemplate) throws IOException {
-        List<BookMigrateDto> booksDTO = readJson("data/test-books.json", new TypeReference<>() {
+        List<BookDto> booksDTO = readJson("data/test-books.json", new TypeReference<>() {
         });
         List<Book> books = booksDTO.stream().map(dto -> {
             Book book = new Book();
-            book.setTitle(dto.getTitle());
-            book.setAuthorId(dto.getAuthorId());
-            book.setGenreIds(dto.getGenres());
+            book.setTitle(dto.title());
+            book.setAuthor(new Author(dto.author().id(), dto.author().fullName()));
+            book.setGenres(dto.genres().stream()
+                    .map(genreDto -> new Genre(genreDto.id(), genreDto.name()))
+                    .toList());
             return book;
         }).toList();
         books.forEach(mongoTemplate::save);

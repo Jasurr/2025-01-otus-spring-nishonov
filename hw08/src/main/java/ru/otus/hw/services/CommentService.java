@@ -8,13 +8,13 @@ import java.util.Optional;
 
 public interface CommentService {
 
-    Optional<Comment> findById(String id);
+    Optional<CommentDto> findById(String id);
 
-    List<Comment> findByBookId(String bookId);
+    List<CommentDto> findByBookId(String bookId);
 
-    Comment insert(String message, String bookId);
+    CommentDto insert(String message, String bookId);
 
-    CommentDto update(String id, String message, String bookId);
+    CommentDto update(String id, String message);
 
     void deleteById(String id);
 }

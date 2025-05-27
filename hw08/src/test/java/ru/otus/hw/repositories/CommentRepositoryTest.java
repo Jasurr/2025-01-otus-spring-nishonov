@@ -1,12 +1,11 @@
 package ru.otus.hw.repositories;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.test.context.ActiveProfiles;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import ru.otus.hw.models.Book;
 import ru.otus.hw.models.Comment;
 
@@ -14,9 +13,9 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest
-@ActiveProfiles("test")
-public class CommentRepositoryTest {
+@DataMongoTest
+class CommentRepositoryTest {
+    private static final String FIRST_BOOK_ID = "1"; // MongoDB typically uses String IDs
     private static final String TEST_COMMENT_MESSAGE = "Test comment";
     private static final String UPDATED_COMMENT_MESSAGE = "Updated comment";
 
@@ -30,9 +29,11 @@ public class CommentRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        book = mongoTemplate.findAll(Book.class).stream()
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("Book not found"));
+        // Create and save a test book
+        book = new Book();
+        book.setId(FIRST_BOOK_ID);
+        book.setTitle("Test Book");
+        mongoTemplate.save(book);
     }
 
     @Test
@@ -42,7 +43,7 @@ public class CommentRepositoryTest {
         Comment savedComment = commentRepository.save(comment);
         assertThat(savedComment.getId()).isNotNull();
         assertThat(savedComment.getMessage()).isEqualTo(TEST_COMMENT_MESSAGE);
-        assertThat(savedComment.getBook()).isEqualTo(book.getId());
+        assertThat(savedComment.getBook()).isEqualToComparingFieldByField(book);
     }
 
     @Test
@@ -69,7 +70,7 @@ public class CommentRepositoryTest {
     private Comment createTestComment() {
         Comment comment = new Comment();
         comment.setMessage(TEST_COMMENT_MESSAGE);
-        comment.setBook(book.getId());
+        comment.setBook(book);
         return comment;
     }
 }

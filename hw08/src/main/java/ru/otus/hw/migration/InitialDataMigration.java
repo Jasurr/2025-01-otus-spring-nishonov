@@ -4,13 +4,10 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.cloudyrock.mongock.ChangeLog;
 import com.github.cloudyrock.mongock.ChangeSet;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import ru.otus.hw.dto.AuthorDto;
-import ru.otus.hw.dto.BookMigrateDto;
+import ru.otus.hw.dto.BookDto;
 import ru.otus.hw.dto.GenreDto;
-import ru.otus.hw.mapper.AuthorMapper;
-import ru.otus.hw.mapper.GenreMapper;
 import ru.otus.hw.models.Author;
 import ru.otus.hw.models.Book;
 import ru.otus.hw.models.Genre;
@@ -46,7 +43,7 @@ public class InitialDataMigration {
         List<GenreDto> genreDTOs = readJson("data/genres.json", new TypeReference<>() {
         });
         List<Genre> genres = genreDTOs.stream()
-                .map(GenreMapper::toDocument)
+                .map(genreDto -> new Genre(genreDto.id(), genreDto.name()))
                 .toList();
         genres.forEach(mongoTemplate::save);
         LOGGER.info("✅ Genres imported successfully: " + genres.size());
@@ -56,14 +53,18 @@ public class InitialDataMigration {
     public void initBooks(MongoTemplate mongoTemplate) throws IOException {
         // Load books from JSON and save to MongoDB
 
-        List<BookMigrateDto> booksDTO = readJson("data/books.json", new TypeReference<>() {
+        List<BookDto> booksDTO = readJson("data/books.json", new TypeReference<>() {
         });
         var books = booksDTO.stream()
                 .map(bookDTO -> {
                     Book book = new Book();
                     book.setTitle(bookDTO.title());
-//                    book.setAuthorId(bookDTO.getAuthorId());
-//                    book.setGenreIds(bookDTO.getGenres());
+                    book.setAuthor(new Author(bookDTO.author().id(), bookDTO.author().fullName()));
+                   book.setGenres(
+                            bookDTO.genres().stream()
+                                    .map(genreDto -> new Genre(genreDto.id(), genreDto.name()))
+                                    .toList()
+                    );
                     return book;
                 })
                 .toList();

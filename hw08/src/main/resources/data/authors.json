@@ -1,14 +1,14 @@
 [
   {
     "id": "1",
-    "full_name": "Author 1"
+    "fullName": "Author 1"
   },
   {
     "id": "2",
-    "full_name": "Author 2"
+    "fullName": "Author 2"
   },
   {
     "id": "3",
-    "full_name": "Author 3"
+    "fullName": "Author 3"
   }
 ]

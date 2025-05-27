@@ -1,17 +1,15 @@
 package ru.otus.hw.repositories;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import ru.otus.hw.models.Author;
-
-import java.util.List;
+import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest
-@ActiveProfiles("test")
+@DataMongoTest
+@ExtendWith(SpringExtension.class)
 class AuthorRepositoryTest {
 
     @Autowired
@@ -19,7 +17,7 @@ class AuthorRepositoryTest {
 
     @Test
     void shouldFindAll() {
-        List<Author> authors = authorRepository.findAll();
+        var authors = authorRepository.findAll();
         assertThat(authors)
                 .isNotNull()
                 .isNotEmpty()

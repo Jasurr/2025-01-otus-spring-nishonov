@@ -8,6 +8,4 @@ import java.util.Set;
 
 public interface GenreRepository extends MongoRepository<Genre, Long> {
     List<Genre> findAllByIdIn(Set<String> ids);
-
-    long countByIdIn(Set<String> ids);
 }

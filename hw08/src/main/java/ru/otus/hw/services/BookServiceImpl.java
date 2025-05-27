@@ -1,12 +1,16 @@
 package ru.otus.hw.services;
 
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.otus.hw.dto.BookDto;
 import ru.otus.hw.exceptions.EntityNotFoundException;
 import ru.otus.hw.mapper.BookMapper;
+import ru.otus.hw.models.Author;
 import ru.otus.hw.models.Book;
+import ru.otus.hw.models.Genre;
 import ru.otus.hw.repositories.AuthorRepository;
 import ru.otus.hw.repositories.BookRepository;
 import ru.otus.hw.repositories.GenreRepository;
@@ -14,22 +18,31 @@ import ru.otus.hw.repositories.GenreRepository;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
-@RequiredArgsConstructor
 @Service
+@RequiredArgsConstructor
 public class BookServiceImpl implements BookService {
+
+    private static final String ERROR_BOOK_NOT_FOUND = "Book with id %s not found";
+    private static final String ERROR_AUTHOR_NOT_FOUND = "Author with id %s not found";
+    private static final String ERROR_GENRES_NOT_FOUND = "One or more genres with ids %s not found";
+    private static final String ERROR_INVALID_TITLE = "Title must not be null or empty";
+    private static final String ERROR_INVALID_AUTHOR_ID = "Author ID must not be null";
+    private static final String ERROR_INVALID_GENRES = "Genres IDs must not be null or empty";
+    private static final String ERROR_INVALID_ID = "ID must not be null or empty for update";
+
     private final AuthorRepository authorRepository;
 
     private final GenreRepository genreRepository;
 
     private final BookRepository bookRepository;
 
+    private final BookMapper bookMapper;
+
     @Override
     public Optional<BookDto> findById(String id) {
-        return null;
-
-//        return bookRepository.findByIdWithAuthorAndGenres(id)
-//                .map(BookMapper::toDTO);
+        return bookRepository.findById(id).map(bookMapper::toDto);
     }
 
     @Transactional(readOnly = true)
@@ -37,23 +50,23 @@ public class BookServiceImpl implements BookService {
     public List<BookDto> findAll() {
         return bookRepository.findAll()
                 .stream()
-                .map(BookMapper::toDTO)
-                .toList();
+                .map(bookMapper::toDto)
+                .collect(Collectors.toList());
     }
 
     @Transactional
     @Override
     public BookDto insert(String title, String authorId, Set<String> genresIds) {
-        return save(null, title, authorId, genresIds);
+        return save(null, title, authorId, Set.copyOf(genresIds));
     }
 
     @Transactional
     @Override
     public BookDto update(String id, String title, String authorId, Set<String> genresIds) {
         if (id == null || id.trim().isEmpty()) {
-            throw new IllegalArgumentException("Book ID must be greater than 0");
+            throw new IllegalArgumentException(ERROR_INVALID_ID);
         }
-        return save(id, title, authorId, genresIds);
+        return save(id, title, authorId, Set.copyOf(genresIds));
     }
 
     @Transactional
@@ -62,48 +75,44 @@ public class BookServiceImpl implements BookService {
         bookRepository.deleteById(id);
     }
 
-    public BookDto save(String id, String title, String authorId, Set<String> genresIds) {
-        validateInputs(id, title, authorId, genresIds);
+    private BookDto save(String id, String title, String authorId, Set<String> genresIds) {
+        validateInput(title, authorId, genresIds);
 
-        // Muallifni tekshirish
-        if (!authorRepository.existsById(authorId)) {
-            throw new EntityNotFoundException("Author with id %s not found".formatted(authorId));
-        }
-
-        // Janrlarni tekshirish
-        long existingGenresCount = genreRepository.countByIdIn(genresIds);
-        if (existingGenresCount != genresIds.size()) {
-            throw new EntityNotFoundException("One or more genres with ids %s not found".formatted(genresIds));
-        }
-
-        // Kitobni yaratish yoki yangilash
+        Author author = findAuthor(authorId);
+        List<Genre> genres = findGenres(genresIds);
         Book book = id == null ? new Book() : bookRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Book with id %s not found".formatted(id)));
+                .orElseThrow(() -> new EntityNotFoundException(ERROR_BOOK_NOT_FOUND.formatted(id)));
 
         book.setTitle(title);
+        book.setAuthor(author);
+        book.setGenres(genres);
 
-//        book.setAuthorId(authorId);
-//        book.setGenreIds(List.copyOf(genresIds)); // Set ni List ga aylantirish
-        book.setAuthor(authorRepository.findById(authorId)
-                .orElseThrow(() -> new EntityNotFoundException("Author with id %s not found".formatted(authorId))));
-
-        bookRepository.save(book);
-
-        return BookMapper.toDTO(book);
+        Book savedBook = bookRepository.save(book);
+        return bookMapper.toDto(savedBook);
     }
 
-    private void validateInputs(String id, String title, String authorId, Set<String> genresIds) {
+    private Author findAuthor(String authorId) {
+        return authorRepository.findById(authorId)
+                .orElseThrow(() -> new EntityNotFoundException(ERROR_AUTHOR_NOT_FOUND.formatted(authorId)));
+    }
+
+    private List<Genre> findGenres(Set<String> genresIds) {
+        List<Genre> genres = genreRepository.findAllByIdIn(genresIds);
+        if (genres.size() != genresIds.size()) {
+            throw new EntityNotFoundException(ERROR_GENRES_NOT_FOUND.formatted(genresIds));
+        }
+        return genres;
+    }
+
+    private void validateInput(String title, String authorId, Set<String> genresIds) {
         if (title == null || title.trim().isEmpty()) {
-            throw new IllegalArgumentException("Title must not be null or empty");
+            throw new IllegalArgumentException(ERROR_INVALID_TITLE);
         }
         if (authorId == null || authorId.trim().isEmpty()) {
-            throw new IllegalArgumentException("Author ID must not be null or empty");
+            throw new IllegalArgumentException(ERROR_INVALID_AUTHOR_ID);
         }
         if (genresIds == null || genresIds.isEmpty()) {
-            throw new IllegalArgumentException("Genres IDs must not be null, empty, or contain null elements");
-        }
-        if (id != null && id.trim().isEmpty()) {
-            throw new IllegalArgumentException("Book ID must not be empty if provided");
+            throw new IllegalArgumentException(ERROR_INVALID_GENRES);
         }
     }
 }

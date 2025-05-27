@@ -30,14 +30,14 @@ class CommentServiceTest {
     @BeforeEach
     void setUp() {
         testBook = getAnyBook();
-        assertThat(testBook).isNotNull(); // Testga oldindan kitob kerak
+        assertThat(testBook).isNotNull();
     }
 
     @Test
     @DisplayName("Should find comment by ID")
     void shouldFindCommentById() {
         var savedComment = commentService.insert(COMMENT_MESSAGE, testBook.getId());
-        var foundComment = commentService.findById(savedComment.getId());
+        var foundComment = commentService.findById(savedComment.id());
 
         assertThat(foundComment)
                 .isPresent()
@@ -54,9 +54,9 @@ class CommentServiceTest {
 
         assertThat(comments)
                 .isNotEmpty()
-                .allMatch(c -> c.getMessage() != null && !c.getMessage().isBlank())
-                .allMatch(c -> c.getBook().equals(testBook.getId()))
-                .anyMatch(c -> c.getId().equals(savedComment.getId()) && c.getMessage().equals(COMMENT_MESSAGE));
+                .allMatch(c -> c.message() != null && !c.message().isBlank())
+                .allMatch(c -> c.book().equals(testBook.getId()))
+                .anyMatch(c -> c.id().equals(savedComment.id()) && c.message().equals(COMMENT_MESSAGE));
     }
 
     @Test
@@ -74,7 +74,7 @@ class CommentServiceTest {
     @DisplayName("Should update comment")
     void shouldUpdateComment() {
         var savedComment = commentService.insert(COMMENT_MESSAGE, testBook.getId());
-        var updatedComment = commentService.update(savedComment.getId(), UPDATED_COMMENT_MESSAGE, testBook.getId());
+        var updatedComment = commentService.update(savedComment.id(), UPDATED_COMMENT_MESSAGE);
 
         assertThat(updatedComment)
                 .isNotNull()
@@ -86,9 +86,9 @@ class CommentServiceTest {
     @DisplayName("Should delete comment")
     void shouldDeleteComment() {
         var savedComment = commentService.insert(COMMENT_MESSAGE, testBook.getId());
-        commentService.deleteById(savedComment.getId());
+        commentService.deleteById(savedComment.id());
 
-        var deletedComment = commentService.findById(savedComment.getId());
+        var deletedComment = commentService.findById(savedComment.id());
         assertThat(deletedComment).isEmpty();
     }
 
