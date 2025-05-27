@@ -6,7 +6,6 @@ import ru.otus.hw.models.Author;
 
 @Component
 public class AuthorMapper {
-
     public AuthorDto toDto(Author author) {
         return new AuthorDto(
                 author.getId(),

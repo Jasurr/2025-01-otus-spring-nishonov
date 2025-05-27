@@ -21,6 +21,8 @@ public class CommentServiceImpl implements CommentService {
 
     private final BookRepository bookRepository;
 
+    private final CommentMapper commentMapper;
+
     @Override
     @Transactional(readOnly = true)
     public Optional<SimpleCommentDto> findById(long id) {
@@ -48,7 +50,7 @@ public class CommentServiceImpl implements CommentService {
         } else {
             throw new EntityNotFoundException("Book not found");
         }
-        return CommentMapper.toDto(commentRepository.save(comment));
+        return commentMapper.toDto(commentRepository.save(comment));
     }
 
     @Override
@@ -57,7 +59,7 @@ public class CommentServiceImpl implements CommentService {
         return commentRepository.findById(id)
                 .map(comment -> {
                     comment.setMessage(message);
-                    return CommentMapper.toDto(commentRepository.save(comment));
+                    return commentMapper.toDto(commentRepository.save(comment));
                 })
                 .orElseThrow(() -> new EntityNotFoundException("Comment not found"));
     }
