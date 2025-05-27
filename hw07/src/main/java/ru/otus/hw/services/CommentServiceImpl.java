@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.otus.hw.dto.CommentDto;
+import ru.otus.hw.dto.SimpleCommentDto;
 import ru.otus.hw.exceptions.EntityNotFoundException;
 import ru.otus.hw.mapper.CommentMapper;
 import ru.otus.hw.models.Comment;
@@ -22,17 +23,17 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<CommentDto> findById(long id) {
+    public Optional<SimpleCommentDto> findById(long id) {
         return commentRepository.findById(id)
-                .map(CommentMapper::toDto);
+                .map(comment -> new SimpleCommentDto(comment.getId(), comment.getMessage()));
     }
 
     @Transactional(readOnly = true)
     @Override
-    public List<CommentDto> findByBookId(long bookId) {
+    public List<SimpleCommentDto> findByBookId(long bookId) {
         return commentRepository.findByBookId(bookId)
                 .stream()
-                .map(CommentMapper::toDto)
+                .map(comment -> new SimpleCommentDto(comment.getId(), comment.getMessage()))
                 .toList();
     }
 
@@ -53,14 +54,12 @@ public class CommentServiceImpl implements CommentService {
     @Override
     @Transactional
     public CommentDto update(long id, String message) {
-        var commentOptional = commentRepository.findById(id);
-        if (commentOptional.isPresent()) {
-            var comment = commentOptional.get();
-            comment.setMessage(message);
-            return CommentMapper.toDto(commentRepository.save(comment));
-        } else {
-            throw new EntityNotFoundException("Comment not found");
-        }
+        return commentRepository.findById(id)
+                .map(comment -> {
+                    comment.setMessage(message);
+                    return CommentMapper.toDto(commentRepository.save(comment));
+                })
+                .orElseThrow(() -> new EntityNotFoundException("Comment not found"));
     }
 
     @Transactional

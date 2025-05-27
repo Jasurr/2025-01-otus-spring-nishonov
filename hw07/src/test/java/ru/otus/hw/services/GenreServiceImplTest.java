@@ -5,11 +5,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import ru.otus.hw.mapper.GenreMapper;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
-@Import(GenreServiceImpl.class)
+@Import({GenreServiceImpl.class, GenreMapper.class})
 @DisplayName("Genre Service Tests")
 class GenreServiceImplTest {
     @Autowired
@@ -22,6 +23,6 @@ class GenreServiceImplTest {
         assertThat(genres)
                 .isNotNull()
                 .isNotEmpty()
-                .allMatch(genre -> genre.getName() != null && !genre.getName().isEmpty());
+                .allMatch(genre -> genre.name() != null && !genre.name().isEmpty());
     }
 }

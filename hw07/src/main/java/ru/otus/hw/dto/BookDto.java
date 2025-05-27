@@ -1,23 +1,9 @@
 package ru.otus.hw.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
 import java.util.List;
 
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
-public class BookDto {
-
-    private long id;
-
-    private String title;
-
-    private AuthorDto author;
-
-    private List<GenreDto> genres;
+public record BookDto(long id,
+                      String title,
+                      AuthorDto author,
+                      List<GenreDto> genres) {
 }

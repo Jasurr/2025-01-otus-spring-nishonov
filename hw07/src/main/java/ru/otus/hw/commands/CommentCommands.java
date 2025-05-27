@@ -19,9 +19,8 @@ public class CommentCommands {
     public String findCommentById(long id) {
         return commentService.findById(id)
                 .map(comment -> commentConverter.commentToString(
-                        comment.getId(),
-                        comment.getMessage(),
-                        comment.getBook().getId()))
+                        comment.id(),
+                        comment.message()))
                 .orElse("Comment with id %d not found".formatted(id));
     }
 
@@ -29,9 +28,8 @@ public class CommentCommands {
     public String findCommentByBookId(long bookId) {
         return commentService.findByBookId(bookId).stream()
                 .map(comment -> commentConverter.commentToString(
-                        comment.getId(),
-                        comment.getMessage(),
-                        comment.getBook().getId()))
+                        comment.id(),
+                        comment.message()))
                 .collect(Collectors.joining("," + System.lineSeparator()));
     }
 
@@ -39,18 +37,18 @@ public class CommentCommands {
     public String insertComment(String message, long bookId) {
         var savedComment = commentService.insert(message, bookId);
         return commentConverter.commentToString(
-                savedComment.getId(),
-                savedComment.getMessage(),
-                savedComment.getBook().getId());
+                savedComment.id(),
+                savedComment.message(),
+                savedComment.book().id());
     }
 
     @ShellMethod(value = "Update comment", key = "cupd")
     public String updateComment(long id, String message) {
         var updatedComment = commentService.update(id, message);
         return commentConverter.commentToString(
-                updatedComment.getId(),
-                updatedComment.getMessage(),
-                updatedComment.getBook().getId());
+                updatedComment.id(),
+                updatedComment.message(),
+                updatedComment.book().id());
     }
 
     @ShellMethod(value = "Delete comment by id", key = "cdel")
