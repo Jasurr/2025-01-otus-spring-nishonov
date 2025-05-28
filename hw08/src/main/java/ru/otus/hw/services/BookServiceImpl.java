@@ -1,8 +1,6 @@
 package ru.otus.hw.services;
 
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.otus.hw.dto.BookDto;
@@ -25,11 +23,17 @@ import java.util.stream.Collectors;
 public class BookServiceImpl implements BookService {
 
     private static final String ERROR_BOOK_NOT_FOUND = "Book with id %s not found";
+
     private static final String ERROR_AUTHOR_NOT_FOUND = "Author with id %s not found";
+
     private static final String ERROR_GENRES_NOT_FOUND = "One or more genres with ids %s not found";
+
     private static final String ERROR_INVALID_TITLE = "Title must not be null or empty";
+
     private static final String ERROR_INVALID_AUTHOR_ID = "Author ID must not be null";
+
     private static final String ERROR_INVALID_GENRES = "Genres IDs must not be null or empty";
+
     private static final String ERROR_INVALID_ID = "ID must not be null or empty for update";
 
     private final AuthorRepository authorRepository;
@@ -42,13 +46,14 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public Optional<BookDto> findById(String id) {
-        return bookRepository.findById(id).map(bookMapper::toDto);
+        return bookRepository.findByIdWithRelations(id)
+                .map(bookMapper::toDto);
     }
 
     @Transactional(readOnly = true)
     @Override
     public List<BookDto> findAll() {
-        return bookRepository.findAll()
+        return bookRepository.findAllWithRelations()
                 .stream()
                 .map(bookMapper::toDto)
                 .collect(Collectors.toList());

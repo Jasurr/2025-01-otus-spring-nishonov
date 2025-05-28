@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @ShellComponent
+@SuppressWarnings({"SpellCheckingInspection", "unused"})
 public class CommentCommands {
     private final CommentService commentService;
 
@@ -39,8 +40,7 @@ public class CommentCommands {
         var savedComment = commentService.insert(message, bookId);
         return commentConverter.commentToString(
                 savedComment.id(),
-                savedComment.message(),
-                savedComment.book().id()
+                savedComment.message()
         );
     }
 
@@ -49,8 +49,7 @@ public class CommentCommands {
         var updatedComment = commentService.update(id, message);
         return commentConverter.commentToString(
                 updatedComment.id(),
-                updatedComment.message(),
-                updatedComment.book().id()
+                updatedComment.message()
         );
     }
 

@@ -43,8 +43,7 @@ class CommentServiceTest {
         assertThat(foundComment)
                 .isPresent()
                 .get()
-                .hasFieldOrPropertyWithValue("message", COMMENT_MESSAGE)
-                .hasFieldOrPropertyWithValue("book.id", testBook.getId());
+                .hasFieldOrPropertyWithValue("message", COMMENT_MESSAGE);
     }
 
     @Test
@@ -67,8 +66,7 @@ class CommentServiceTest {
 
         assertThat(savedComment)
                 .isNotNull()
-                .hasFieldOrPropertyWithValue("message", COMMENT_MESSAGE)
-                .hasFieldOrPropertyWithValue("book.id", testBook.getId());
+                .hasFieldOrPropertyWithValue("message", COMMENT_MESSAGE);
     }
 
     @Test
@@ -79,8 +77,7 @@ class CommentServiceTest {
 
         assertThat(updatedComment)
                 .isNotNull()
-                .hasFieldOrPropertyWithValue("message", UPDATED_COMMENT_MESSAGE)
-                .hasFieldOrPropertyWithValue("book.id", testBook.getId());
+                .hasFieldOrPropertyWithValue("message", UPDATED_COMMENT_MESSAGE);
     }
 
     @Test

@@ -10,6 +10,9 @@ import ru.otus.hw.models.Book;
 public class BookMapper {
 
     public BookDto toDto(Book book) {
+        if (book == null) {
+            return null;
+        }
         return new BookDto(
                 book.getId(),
                 book.getTitle(),
