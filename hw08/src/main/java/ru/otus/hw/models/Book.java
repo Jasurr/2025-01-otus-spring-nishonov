@@ -23,9 +23,9 @@ public class Book {
     @Field(name = "title")
     private String title;
 
-    @DBRef
+    @DBRef(lazy = true)
     private Author author;
 
-    @DBRef
+    @DBRef(lazy = true)
     private List<Genre> genres;
 }

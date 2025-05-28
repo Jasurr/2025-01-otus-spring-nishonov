@@ -17,6 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class CommentServiceTest {
 
     private static final String COMMENT_MESSAGE = "Test comment";
+
     private static final String UPDATED_COMMENT_MESSAGE = "Updated comment";
 
     @Autowired
@@ -43,7 +44,7 @@ class CommentServiceTest {
                 .isPresent()
                 .get()
                 .hasFieldOrPropertyWithValue("message", COMMENT_MESSAGE)
-                .hasFieldOrPropertyWithValue("bookId", testBook.getId());
+                .hasFieldOrPropertyWithValue("book.id", testBook.getId());
     }
 
     @Test
@@ -53,10 +54,10 @@ class CommentServiceTest {
         var comments = commentService.findByBookId(testBook.getId());
 
         assertThat(comments)
+                .isNotNull()
                 .isNotEmpty()
-                .allMatch(c -> c.message() != null && !c.message().isBlank())
-                .allMatch(c -> c.book().equals(testBook.getId()))
-                .anyMatch(c -> c.id().equals(savedComment.id()) && c.message().equals(COMMENT_MESSAGE));
+                .allMatch(comment -> comment.message() != null && !comment.message().isEmpty())
+                .anyMatch(comment -> comment.id().equals(savedComment.id()) && comment.message().equals(COMMENT_MESSAGE));
     }
 
     @Test
@@ -67,7 +68,7 @@ class CommentServiceTest {
         assertThat(savedComment)
                 .isNotNull()
                 .hasFieldOrPropertyWithValue("message", COMMENT_MESSAGE)
-                .hasFieldOrPropertyWithValue("bookId", testBook.getId());
+                .hasFieldOrPropertyWithValue("book.id", testBook.getId());
     }
 
     @Test
@@ -79,7 +80,7 @@ class CommentServiceTest {
         assertThat(updatedComment)
                 .isNotNull()
                 .hasFieldOrPropertyWithValue("message", UPDATED_COMMENT_MESSAGE)
-                .hasFieldOrPropertyWithValue("bookId", testBook.getId());
+                .hasFieldOrPropertyWithValue("book.id", testBook.getId());
     }
 
     @Test

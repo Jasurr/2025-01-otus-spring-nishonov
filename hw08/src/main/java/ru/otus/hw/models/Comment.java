@@ -22,6 +22,6 @@ public class Comment {
     @Field(name = "message")
     private String message;
 
-    @DBRef
+    @DBRef(lazy = true)
     private Book book;
 }

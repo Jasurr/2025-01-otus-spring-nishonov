@@ -7,6 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import ru.otus.hw.config.TestMongockConfig;
 import ru.otus.hw.mapper.BookMapper;
 import ru.otus.hw.models.Author;
 import ru.otus.hw.models.Genre;
@@ -16,13 +19,17 @@ import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataMongoTest
-@Import({BookServiceImpl.class, BookMapper.class})
-@DisplayName("Book Service Tests")
+@Import({TestMongockConfig.class, BookServiceImpl.class, BookMapper.class})
+@DisplayName("Book Service Tests for MongoDB")
 class BookServiceTest {
-    private static final String FIRST_AUTHOR_ID = "1";
-    private static final String FIRST_GENRE_ID = "1";
+
     private static final String TEST_BOOK_TITLE = "Test Book";
+
     private static final String UPDATED_BOOK_TITLE = "Updated Book";
+
+    private static final String TEST_AUTHOR_NAME = "Author 1";
+
+    private static final String TEST_GENRE_NAME = "Genre 1";
 
     @Autowired
     private BookService bookService;
@@ -36,9 +43,18 @@ class BookServiceTest {
     @BeforeEach
     @DisplayName("Setup common test data")
     void setUp() {
-        // Preload common test data
-        author = createAndSaveAuthor();
-        genre = createAndSaveGenre();
+        // Fetch Author and Genre from migrated data
+        author = mongoTemplate.findOne(
+                Query.query(Criteria.where("fullName").is(TEST_AUTHOR_NAME)), Author.class);
+        assertThat(author)
+                .as("Author with name " + TEST_AUTHOR_NAME + " not found")
+                .isNotNull();
+
+        genre = mongoTemplate.findOne(
+                Query.query(Criteria.where("name").is(TEST_GENRE_NAME)), Genre.class);
+        assertThat(genre)
+                .as("Genre with name " + TEST_GENRE_NAME + " not found")
+                .isNotNull();
     }
 
     @Test
@@ -58,7 +74,6 @@ class BookServiceTest {
     @Test
     @DisplayName("Find all books should return non-empty list")
     void shouldFindAllBooks() {
-        bookService.insert(TEST_BOOK_TITLE, author.getId(), Set.of(genre.getId()));
         var books = bookService.findAll();
         assertThat(books)
                 .isNotEmpty()
@@ -98,21 +113,5 @@ class BookServiceTest {
 
         var deletedBook = bookService.findById(insertedBook.id());
         assertThat(deletedBook).isEmpty();
-    }
-
-    private Author createAndSaveAuthor() {
-        Author author = new Author();
-        author.setId(FIRST_AUTHOR_ID);
-        author.setFullName("Test Author");
-        mongoTemplate.save(author);
-        return author;
-    }
-
-    private Genre createAndSaveGenre() {
-        Genre genre = new Genre();
-        genre.setId(FIRST_GENRE_ID);
-        genre.setName("Test Genre");
-        mongoTemplate.save(genre);
-        return genre;
     }
 }

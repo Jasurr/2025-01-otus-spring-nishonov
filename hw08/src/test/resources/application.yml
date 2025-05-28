@@ -2,10 +2,10 @@ spring:
   data:
     mongodb:
       database: testdb
-      host: localhost
-      port: 0
   shell:
     interactive:
       enabled: false
+
 mongock:
+  enabled: true
   migration-scan-package: ru.otus.hw.migration
