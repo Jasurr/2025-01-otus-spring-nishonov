@@ -6,9 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
-import ru.otus.hw.models.Author;
-import ru.otus.hw.models.Book;
-import ru.otus.hw.models.Genre;
+import ru.otus.hw.dto.AuthorDto;
+import ru.otus.hw.dto.BookDto;
+import ru.otus.hw.dto.GenreDto;
 import ru.otus.hw.services.AuthorService;
 import ru.otus.hw.services.BookService;
 import ru.otus.hw.services.GenreService;
@@ -16,13 +16,10 @@ import ru.otus.hw.services.GenreService;
 import java.util.List;
 import java.util.Optional;
 
-import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(BookController.class)
 class BookControllerTest {
@@ -38,22 +35,22 @@ class BookControllerTest {
     @MockBean
     private GenreService genreService;
 
-    private final List<Book> books = List.of(
-            new Book(1L, "Book 1", new Author(1L, "Author 1"), List.of(new Genre(1L, "Genre 1"))),
-            new Book(2L, "Book 2", new Author(2L, "Author 2"), List.of(new Genre(2L, "Genre 2"))),
-            new Book(3L, "Book 3", new Author(3L, "Author 3"), List.of(new Genre(3L, "Genre 3")))
+    private final List<BookDto> books = List.of(
+            new BookDto(1L, "Book 1", new AuthorDto(1L, "Author 1"), List.of(new GenreDto(1L, "Genre 1"))),
+            new BookDto(2L, "Book 2", new AuthorDto(2L, "Author 2"), List.of(new GenreDto(2L, "Genre 2"))),
+            new BookDto(3L, "Book 3", new AuthorDto(3L, "Author 3"), List.of(new GenreDto(3L, "Genre 3")))
     );
 
-    private final List<Genre> genres = List.of(
-            new Genre(1L, "Genre 1"),
-            new Genre(2L, "Genre 2"),
-            new Genre(3L, "Genre 3")
+    private final List<GenreDto> genres = List.of(
+            new GenreDto(1L, "Genre 1"),
+            new GenreDto(2L, "Genre 2"),
+            new GenreDto(3L, "Genre 3")
     );
 
-    private final List<Author> authors = List.of(
-            new Author(1L, "Author 1"),
-            new Author(2L, "Author 2"),
-            new Author(3L, "Author 3")
+    private final List<AuthorDto> authors = List.of(
+            new AuthorDto(1L, "Author 1"),
+            new AuthorDto(2L, "Author 2"),
+            new AuthorDto(3L, "Author 3")
     );
 
     @Test
@@ -80,8 +77,8 @@ class BookControllerTest {
     @Test
     @DisplayName("should show add book form with authors and genres")
     void shouldShowAddBookForm() throws Exception {
-        List<Author> authors = List.of(new Author(1L, "Author 1"));
-        List<Genre> genres = List.of(new Genre(1L, "Genre 1"));
+        List<AuthorDto> authors = List.of(new AuthorDto(1L, "Author 1"));
+        List<GenreDto> genres = List.of(new GenreDto(1L, "Genre 1"));
 
         when(authorService.findAll()).thenReturn(authors);
         when(genreService.findAll()).thenReturn(genres);
@@ -99,7 +96,7 @@ class BookControllerTest {
     @DisplayName("should return edit book page with authors and genres")
     void shouldReturnEditBookPage() throws Exception {
         long bookId = 1L;
-        Book book = new Book(bookId, "Book 1", new Author(1L, "Author 1"), List.of(new Genre(1L, "Genre 1")));
+        BookDto book = new BookDto(bookId, "Book 1", new AuthorDto(1L, "Author 1"), List.of(new GenreDto(1L, "Genre 1")));
         when(bookService.findById(bookId)).thenReturn(Optional.of(book));
         when(authorService.findAll()).thenReturn(authors);
         when(genreService.findAll()).thenReturn(genres);
@@ -114,7 +111,7 @@ class BookControllerTest {
     @DisplayName("should return delete book page")
     void shouldDeleteBookAndRedirect() throws Exception {
         long bookId = 1L;
-        Book book = new Book(bookId, "Book 1", new Author(1L, "Author 1"), List.of(new Genre(1L, "Genre 1")));
+        BookDto book = new BookDto(bookId, "Book 1", new AuthorDto(1L, "Author 1"), List.of(new GenreDto(1L, "Genre 1")));
         when(bookService.findById(bookId)).thenReturn(Optional.of(book));
 
         mvc.perform(get("/book/delete/{id}", bookId))

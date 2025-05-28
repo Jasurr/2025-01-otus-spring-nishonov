@@ -7,7 +7,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import ru.otus.hw.dto.CommentDTO;
+import ru.otus.hw.dto.CommentDto;
 import ru.otus.hw.services.CommentService;
 
 import java.util.List;
@@ -35,9 +35,9 @@ class CommentControllerTest {
 
     @Test
     void shouldReturnCommentsByBookId() throws Exception {
-        List<CommentDTO> comments = List.of(
-                new CommentDTO(1L, "Comment 1", 1L),
-                new CommentDTO(2L, "Comment 2", 1L)
+        List<CommentDto> comments = List.of(
+                new CommentDto(1L, "First comment"),
+                new CommentDto(2L, "Second comment")
         );
 
         when(commentService.findByBookId(1L)).thenReturn(comments);
@@ -49,7 +49,7 @@ class CommentControllerTest {
 
     @Test
     void shouldAddComment() throws Exception {
-        CommentDTO comment = new CommentDTO(1L, "New comment", 1L);
+        CommentDto comment = new CommentDto(1L, "New comment");
 
         when(commentService.insert("New comment", 1L)).thenReturn(comment);
 
@@ -62,10 +62,9 @@ class CommentControllerTest {
     @Test
     void shouldUpdateComment() throws Exception {
         long commentId = 1L;
-        long bookId = 1L;
-        CommentDTO comment = new CommentDTO(commentId, "Updated message", bookId);
+        CommentDto comment = new CommentDto(commentId, "Updated message");
 
-        when(commentService.update(commentId, "Updated message", bookId)).thenReturn(comment);
+        when(commentService.update(commentId, "Updated message")).thenReturn(comment);
 
         mvc.perform(put("/book/comment/1")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -78,7 +77,7 @@ class CommentControllerTest {
     @Test
     void shouldDeleteComment() throws Exception {
         long commentId = 1L;
-        CommentDTO comment = new CommentDTO(commentId, "New comment", 1L);
+        CommentDto comment = new CommentDto(commentId, "New comment");
 
         when(commentService.findById(commentId)).thenReturn(Optional.of(comment));
 

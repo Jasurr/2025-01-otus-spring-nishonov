@@ -3,8 +3,12 @@ package ru.otus.hw.services;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.otus.hw.dto.BookDto;
 import ru.otus.hw.exceptions.EntityNotFoundException;
+import ru.otus.hw.mapper.BookMapper;
+import ru.otus.hw.models.Author;
 import ru.otus.hw.models.Book;
+import ru.otus.hw.models.Genre;
 import ru.otus.hw.repositories.AuthorRepository;
 import ru.otus.hw.repositories.BookRepository;
 import ru.otus.hw.repositories.GenreRepository;
@@ -22,26 +26,32 @@ public class BookServiceImpl implements BookService {
 
     private final BookRepository bookRepository;
 
+    private final BookMapper bookMapper;
+
     @Override
-    public Optional<Book> findById(long id) {
-        return bookRepository.findById(id);
+    public Optional<BookDto> findById(long id) {
+        return bookRepository.findById(id)
+                .map(bookMapper::toDto);
     }
 
     @Transactional(readOnly = true)
     @Override
-    public List<Book> findAll() {
-        return bookRepository.findAll();
+    public List<BookDto> findAll() {
+        return bookRepository.findAll()
+                .stream()
+                .map(bookMapper::toDto)
+                .toList();
     }
 
     @Transactional
     @Override
-    public Book insert(String title, long authorId, Set<Long> genresIds) {
+    public BookDto insert(String title, long authorId, Set<Long> genresIds) {
         return save(null, title, authorId, genresIds);
     }
 
     @Transactional
     @Override
-    public Book update(long id, String title, long authorId, Set<Long> genresIds) {
+    public BookDto update(long id, String title, long authorId, Set<Long> genresIds) {
         if (id <= 0) {
             throw new IllegalArgumentException("Book ID must be greater than 0");
         }
@@ -54,35 +64,56 @@ public class BookServiceImpl implements BookService {
         bookRepository.deleteById(id);
     }
 
-    private Book save(Long id, String title, long authorId, Set<Long> genresIds) {
-        validateInputs(title, genresIds);
-        var author = authorRepository.findById(authorId)
-                .orElseThrow(() -> new EntityNotFoundException("Author with id %d not found".formatted(authorId)));
-        var genres = genreRepository.findAllByIdIn(genresIds);
-        if (genres.size() != genresIds.size()) {
-            throw new EntityNotFoundException("One or more genres with ids %s not found".formatted(genresIds));
-        }
+    private BookDto save(Long id, String title, long authorId, Set<Long> genresIds) {
+        validateInput(title, authorId, genresIds);
+        validateInput(title, authorId, genresIds);
 
-        Book book;
-        if (id == null) {
-            book = new Book();
-        } else {
-            book = bookRepository.findById(id)
-                    .orElseThrow(() -> new EntityNotFoundException("Book with id %d not found".formatted(id)));
-        }
+        var author = findAuthor(authorId);
+        var genres = findGenres(genresIds);
+        var book = prepareBook(id);
 
         book.setTitle(title);
         book.setAuthor(author);
         book.setGenres(genres);
-        return bookRepository.save(book);
+
+        return bookMapper.toDto(bookRepository.save(book));
     }
 
-    private void validateInputs(String title, Set<Long> genresIds) {
+    private Author findAuthor(Long authorId) {
+        return authorRepository.findById(authorId)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Author with id %d not found".formatted(authorId)));
+    }
+
+    private List<Genre> findGenres(Set<Long> genresIds) {
+        var genres = genreRepository.findAllByIdIn(genresIds);
+        if (genres.size() != genresIds.size()) {
+            throw new EntityNotFoundException(
+                    "One or more genres with ids %s not found".formatted(genresIds));
+        }
+        return genres;
+    }
+
+    private Book prepareBook(Long id) {
+        if (id == null) {
+            return new Book();
+        }
+        return bookRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Book with id %d not found".formatted(id)));
+    }
+
+    private void validateInput(String title, Long authorId, Set<Long> genresIds) {
         if (title == null || title.trim().isEmpty()) {
             throw new IllegalArgumentException("Title must not be null or empty");
         }
+
+        if (authorId == null) {
+            throw new IllegalArgumentException("Author ID must not be null");
+        }
+
         if (genresIds == null || genresIds.isEmpty()) {
-            throw new IllegalArgumentException("Genres ids must not be null or empty");
+            throw new IllegalArgumentException("Genres IDs must not be null or empty");
         }
     }
 }
