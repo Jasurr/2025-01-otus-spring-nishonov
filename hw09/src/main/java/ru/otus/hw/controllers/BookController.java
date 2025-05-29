@@ -3,17 +3,20 @@ package ru.otus.hw.controllers;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestParam;
 import ru.otus.hw.models.Book;
 import ru.otus.hw.models.Genre;
 import ru.otus.hw.services.AuthorService;
 import ru.otus.hw.services.BookService;
 import ru.otus.hw.services.GenreService;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Controller
@@ -56,17 +59,15 @@ public class BookController {
         model.addAttribute("book", book);
         model.addAttribute("authors", authorService.findAll());
         model.addAttribute("genres", genreService.findAll());
-        System.out.println("Book: " + book);
-        System.out.println("Author: " + authorService.findAll());
-        System.out.println("Genres: " + genreService.findAll());
         return "book/edit";
     }
 
     @PostMapping("/edit")
-    public String updateBook(@ModelAttribute("book") Book book) {
-        var genreIds = book.getGenres().stream()
-                .map(Genre::getId)
-                .collect(Collectors.toSet());
+    public String updateBook(@ModelAttribute("book") Book book,
+                             @RequestParam(value = "genreIds", required = false) Set<Long> genreIds) {
+        if (genreIds == null) {
+            genreIds = new HashSet<>();
+        }
         bookService.update(book.getId(), book.getTitle(), book.getAuthor().getId(), genreIds);
         return "redirect:/book";
     }

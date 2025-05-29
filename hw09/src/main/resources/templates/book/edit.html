@@ -80,27 +80,27 @@
 
 <h2>Edit Book</h2>
 
-<form th:action="@{/book/edit}" method="post">
-    <input type="hidden" th:field="${book.id}"/>
+<form th:action="@{/book/edit}" method="post" th:object="${book}">
+    <input type="hidden" th:field="*{id}"/>
 
     <label for="title">Title</label>
-    <input type="text" id="title" th:field="${book.title}" placeholder="Enter book title" required/>
+    <input type="text" id="title" th:field="*{title}" placeholder="Enter book title" required/>
 
     <label for="author">Author</label>
-    <select id="author" th:field="${book.author.id}" required>
+    <select id="author" th:field="*{author.id}" required>
         <option value="" disabled>Select author</option>
         <option th:each="author : ${authors}"
                 th:value="${author.id}"
                 th:text="${author.fullName}"
-                th:selected="${book.author != null and author.id == book.author.id}"
         ></option>
     </select>
 
     <label for="genres">Genres</label>
-    <select id="genres" th:field="${book.genres}" multiple required>
+    <select id="genres" name="genreIds" multiple required>
         <option th:each="genre : ${genres}"
                 th:value="${genre.id}"
                 th:text="${genre.name}"
+                th:selected="${#lists.contains(book.genres.![id], genre.id)}"
         ></option>
     </select>
 
