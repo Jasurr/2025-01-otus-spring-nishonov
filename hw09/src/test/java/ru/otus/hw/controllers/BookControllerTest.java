@@ -19,6 +19,7 @@ import java.util.Optional;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(BookController.class)
@@ -58,7 +59,7 @@ class BookControllerTest {
     void shouldReturnBooksPage() throws Exception {
         when(bookService.findAll()).thenReturn(books);
         mvc.perform(get("/book"))
-                .andExpect(view().name("book_list"))
+                .andExpect(view().name("book/list"))
                 .andExpect(model().attribute("books", books));
     }
 
@@ -69,7 +70,7 @@ class BookControllerTest {
         when(genreService.findAll()).thenReturn(genres);
 
         mvc.perform(get("/book/add"))
-                .andExpect(view().name("book_add"))
+                .andExpect(view().name("book/add"))
                 .andExpect(model().attributeExists("authors"))
                 .andExpect(model().attributeExists("genres"));
     }
@@ -85,7 +86,7 @@ class BookControllerTest {
 
         mvc.perform(get("/book/add"))
                 .andExpect(status().isOk())
-                .andExpect(view().name("book_add"))
+                .andExpect(view().name("book/add"))
                 .andExpect(model().attributeExists("book"))
                 .andExpect(model().attribute("authors", authors))
                 .andExpect(model().attribute("genres", genres));
@@ -102,7 +103,7 @@ class BookControllerTest {
         when(genreService.findAll()).thenReturn(genres);
 
         mvc.perform(get("/book/edit/" + bookId))
-                .andExpect(view().name("book_edit"))
+                .andExpect(view().name("book/edit"))
                 .andExpect(model().attributeExists("authors"))
                 .andExpect(model().attributeExists("genres"));
     }
@@ -114,7 +115,7 @@ class BookControllerTest {
         BookDto book = new BookDto(bookId, "Book 1", new AuthorDto(1L, "Author 1"), List.of(new GenreDto(1L, "Genre 1")));
         when(bookService.findById(bookId)).thenReturn(Optional.of(book));
 
-        mvc.perform(get("/book/delete/{id}", bookId))
+        mvc.perform(post("/book/delete/{id}", bookId))
                 .andExpect(redirectedUrl("/book"));
 
         verify(bookService).deleteById(bookId);
