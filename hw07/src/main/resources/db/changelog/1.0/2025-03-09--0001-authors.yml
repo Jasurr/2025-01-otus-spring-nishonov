@@ -1,0 +1,19 @@
+databaseChangeLog:
+  - changeSet:
+      id: 2025-03-09--0001--authors
+      author: Jasur
+      changes:
+        - createTable:
+            tableName: authors
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+                    primaryKeyName: authors_pk
+              - column:
+                  name: full_name
+                  type: VARCHAR(255)
