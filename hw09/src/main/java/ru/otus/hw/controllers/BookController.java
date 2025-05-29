@@ -30,7 +30,7 @@ public class BookController {
     public String getAllBooks(Model model) {
         var books = bookService.findAll();
         model.addAttribute("books", books);
-        return "book_list";
+        return "book/list";
     }
 
     @GetMapping("/add")
@@ -38,7 +38,7 @@ public class BookController {
         model.addAttribute("book", new Book());
         model.addAttribute("authors", authorService.findAll());
         model.addAttribute("genres", genreService.findAll());
-        return "book_add";
+        return "book/add";
     }
 
     @PostMapping("/add")
@@ -52,11 +52,14 @@ public class BookController {
 
     @GetMapping("/edit/{id}")
     public String editBook(@PathVariable Long id, Model model) {
-        var book = bookService.findById(id);
+        var book = bookService.findById(id).get();
         model.addAttribute("book", book);
         model.addAttribute("authors", authorService.findAll());
         model.addAttribute("genres", genreService.findAll());
-        return "book_edit";
+        System.out.println("Book: " + book);
+        System.out.println("Author: " + authorService.findAll());
+        System.out.println("Genres: " + genreService.findAll());
+        return "book/edit";
     }
 
     @PostMapping("/edit")
@@ -68,7 +71,7 @@ public class BookController {
         return "redirect:/book";
     }
 
-    @GetMapping("/delete/{id}")
+    @PostMapping("/delete/{id}")
     public String deleteBook(@PathVariable Long id) {
         bookService.deleteById(id);
         return "redirect:/book";

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Comments</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f6f8;
+            margin: 0;
+            padding: 40px;
+        }
+        h2, h3 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 5px 0;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            transition: background-color 0.3s ease;
+        }
+        .button-submit {
+            background-color: #2ecc71;
+        }
+        .button-submit:hover {
+            background-color: #27ae60;
+        }
+        .button-cancel {
+            background-color: #bdc3c7;
+            color: #2c3e50;
+        }
+        .button-cancel:hover {
+            background-color: #95a5a6;
+        }
+        .button-edit {
+            background-color: #2980b9;
+        }
+        .button-edit:hover {
+            background-color: #216a94;
+        }
+        .button-delete {
+            background-color: #c0392b;
+        }
+        .button-delete:hover {
+            background-color: #a93226;
+        }
+        .table-container {
+            width: 90%;
+            margin: auto;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            background-color: white;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #ecf0f1;
+            color: #333;
+        }
+        .buttons {
+            margin-top: 25px;
+            text-align: center;
+        }
+        .error {
+            color: red;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<h2>Comments for Book ID: <span th:text="${bookId}"></span></h2>
+
+<div th:if="${param.error}" class="error">
+    <p th:text="${param.error[0]}"></p>
+</div>
+
+<div class="table-container">
+    <table>
+        <thead>
+        <tr>
+            <th>Comment</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="comment : ${comments}">
+            <td th:text="${comment.message}">Comment text</td>
+            <td>
+                <a th:href="@{/book/comment/{commentId}/edit(commentId=${comment.id},bookId=${bookId})}" class="button button-edit">Edit</a>
+                <form th:action="@{/book/comment/{commentId}/delete(commentId=${comment.id})}" method="post" style="display:inline;">
+                    <input type="hidden" name="bookId" th:value="${bookId}"/>
+                    <button type="submit" class="button button-delete" onclick="return confirm('Are you sure you want to delete this comment?')">Delete</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<h3>Add New Comment</h3>
+<form th:action="@{/book/comment/{bookId}/add(bookId=${bookId})}" method="post">
+    <textarea name="message" rows="4" style="width:100%;" placeholder="Enter your comment" required></textarea>
+    <div class="buttons">
+        <button type="submit" class="button button-submit">Submit</button>
+        <a th:href="@{/book}" class="button button-cancel">Cancel</a>
+    </div>
+</form>
+
+<div class="buttons">
+    <a th:href="@{/book}" class="button button-cancel">Back to Books</a>
+</div>
+</body>
+</html>
