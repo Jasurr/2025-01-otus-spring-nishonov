@@ -46,14 +46,14 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public Optional<BookDto> findById(String id) {
-        return bookRepository.findByIdWithRelations(id)
+        return bookRepository.findById(id)
                 .map(bookMapper::toDto);
     }
 
     @Transactional(readOnly = true)
     @Override
     public List<BookDto> findAll() {
-        return bookRepository.findAllWithRelations()
+        return bookRepository.findAll()
                 .stream()
                 .map(bookMapper::toDto)
                 .collect(Collectors.toList());

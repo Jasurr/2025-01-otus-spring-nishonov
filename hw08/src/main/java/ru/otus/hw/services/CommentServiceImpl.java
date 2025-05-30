@@ -78,7 +78,7 @@ public class CommentServiceImpl implements CommentService {
     }
 
     private Book findBook(String bookId) {
-        return bookRepository.findByIdWithRelations(bookId)
+        return bookRepository.findById(bookId)
                 .orElseThrow(() -> new EntityNotFoundException(ERROR_BOOK_NOT_FOUND.formatted(bookId)));
     }
 
