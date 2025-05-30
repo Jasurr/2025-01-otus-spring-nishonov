@@ -5,12 +5,15 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import ru.otus.hw.mapper.AuthorMapper;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
 @Import({AuthorServiceImpl.class, AuthorMapper.class})
+@Transactional(propagation = Propagation.NOT_SUPPORTED)
 @DisplayName("Author Service Tests")
 class AuthorServiceImplTest {
     @Autowired
