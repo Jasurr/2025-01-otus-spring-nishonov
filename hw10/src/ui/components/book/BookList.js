@@ -13,6 +13,28 @@ export default class BookList extends React.Component {
             .then(books => this.setState({books}));
     }
 
+    deleteBookById(bookId) {
+        if (window.confirm('Are you sure you want to delete this book?')) {
+            fetch(`/api/v1/books/delete/${bookId}`, {
+                method: 'DELETE'
+            })
+                .then(response => {
+                    if (response.ok) {
+                        this.setState(prevState => ({
+                            books: prevState.books.filter(book => book.id !== bookId)
+                        }));
+                    } else {
+                        return response.json().then(error => {
+                            throw new Error(error.message || 'Failed to delete the book.');
+                        });
+                    }
+                })
+                .catch(error => {
+                    alert(error.message); // Xato xabarini ko'rsatish
+                });
+        }
+    }
+
     render() {
         return (
             <>
@@ -46,14 +68,14 @@ export default class BookList extends React.Component {
                                     </td>
                                     <td className="action-buttons">
                                         <Link to={`/book/edit-book/${book.id}`} className="button button-edit">Edit</Link>
-                                        <a href={`/book/delete/${book.id}`} className="button button-delete"
-                                           onClick={() => confirm('Are you sure you want to delete this book?')}>Delete</a>
+                                        <a href="#" className="button button-delete"
+                                           onClick={() => this.deleteBookById(book.id)}>
+                                            Delete</a>
 
-                                        <a href="javascript:void(0);"
-                                           className="button button-comment open-comment-button"
-                                           data-book-id={book.id} data-book-title={book.title}>
+                                        <Link to={"/book/comments/" + book.id}
+                                              className="button button-comment open-comment-button">
                                             Comments
-                                        </a>
+                                        </Link>
                                     </td>
                                 </tr>
                             ))

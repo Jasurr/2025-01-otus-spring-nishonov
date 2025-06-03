@@ -2,8 +2,10 @@ import React from 'react'
 import {NavLink, Route, Routes} from "react-router";
 import Authors from "./Auhtors";
 import Genres from "./Genres";
-import BookList from "./BookList";
-import BookForm from "./BookForm";
+import BookList from "./book/BookList";
+import BookForm from "./book/BookForm";
+import CommentList from "./comment/CommentList";
+import CommentForm from "./comment/CommentForm";
 
 export default class App extends React.Component {
 
@@ -26,6 +28,8 @@ export default class App extends React.Component {
                     <Route path="/genres" element={<Genres/>}/>
                     <Route path="/book/edit-book/:id" element={<BookForm />} />
                     <Route path={"/book/add-new"} element={<BookForm/>}/>
+                    <Route path="/book/comments/:bookId" element={<CommentList />} />
+                    <Route path="/book/comment/edit" element={<CommentForm />} />
                 </Routes>
                 <footer>
                     &copy; 2025 Library System

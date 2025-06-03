@@ -3,8 +3,9 @@ package ru.otus.hw.services;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.otus.hw.dto.CommentDTO;
+import ru.otus.hw.dto.CommentDto;
 import ru.otus.hw.exceptions.EntityNotFoundException;
+import ru.otus.hw.mapper.CommentMapper;
 import ru.otus.hw.models.Comment;
 import ru.otus.hw.repositories.BookRepository;
 import ru.otus.hw.repositories.CommentRepository;
@@ -19,37 +20,27 @@ public class CommentServiceImpl implements CommentService {
 
     private final BookRepository bookRepository;
 
+    private final CommentMapper commentMapper;
+
     @Override
     @Transactional(readOnly = true)
-    public Optional<CommentDTO> findById(long id) {
+    public Optional<CommentDto> findById(long id) {
         return commentRepository.findById(id)
-                .map(comment -> {
-                    var commentDTO = new CommentDTO();
-                    commentDTO.setId(comment.getId());
-                    commentDTO.setMessage(comment.getMessage());
-                    commentDTO.setBookId(comment.getBook().getId());
-                    return commentDTO;
-                });
+                .map(commentMapper::toDto);
     }
 
     @Transactional(readOnly = true)
     @Override
-    public List<CommentDTO> findByBookId(long bookId) {
+    public List<CommentDto> findByBookId(long bookId) {
         return commentRepository.findByBookId(bookId)
                 .stream()
-                .map(comment -> {
-                    var commentDTO = new CommentDTO();
-                    commentDTO.setId(comment.getId());
-                    commentDTO.setMessage(comment.getMessage());
-                    commentDTO.setBookId(comment.getBook().getId());
-                    return commentDTO;
-                })
+                .map(commentMapper::toDto)
                 .toList();
     }
 
     @Transactional
     @Override
-    public CommentDTO insert(String message, long bookId) {
+    public CommentDto insert(String message, long bookId) {
         var book = bookRepository.findById(bookId);
         var comment = new Comment();
         comment.setMessage(message);
@@ -58,37 +49,18 @@ public class CommentServiceImpl implements CommentService {
         } else {
             throw new EntityNotFoundException("Book not found");
         }
-
-        commentRepository.save(comment);
-        var commentDTO = new CommentDTO();
-        commentDTO.setId(comment.getId());
-        commentDTO.setMessage(comment.getMessage());
-        commentDTO.setBookId(comment.getBook().getId());
-        return commentDTO;
+        return commentMapper.toDto(commentRepository.save(comment));
     }
 
     @Override
     @Transactional
-    public CommentDTO update(long id, String message, long bookId) {
-        var comments = commentRepository.findById(id);
-        if (comments.isPresent()) {
-            var comment = comments.get();
-            comment.setMessage(message);
-            var book = bookRepository.findById(bookId);
-            if (book.isPresent()) {
-                comment.setBook(book.get());
-            } else {
-                throw new EntityNotFoundException("Book not found");
-            }
-            commentRepository.save(comment);
-            var commentDTO = new CommentDTO();
-            commentDTO.setId(comment.getId());
-            commentDTO.setMessage(comment.getMessage());
-            commentDTO.setBookId(comment.getBook().getId());
-            return commentDTO;
-        } else {
-            throw new EntityNotFoundException("Comment not found");
-        }
+    public CommentDto update(long id, String message) {
+        return commentRepository.findById(id)
+                .map(comment -> {
+                    comment.setMessage(message);
+                    return commentMapper.toDto(commentRepository.save(comment));
+                })
+                .orElseThrow(() -> new EntityNotFoundException("Comment not found"));
     }
 
     @Transactional
