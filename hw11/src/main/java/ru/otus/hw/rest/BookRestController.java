@@ -1,19 +1,13 @@
 package ru.otus.hw.rest;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import ru.otus.hw.dto.BookDto;
 import ru.otus.hw.dto.GenreDto;
 import ru.otus.hw.services.BookService;
 
-import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
@@ -22,39 +16,36 @@ public class BookRestController {
     private final BookService bookService;
 
     @GetMapping("/api/v1/books")
-    public ResponseEntity<List<BookDto>> getAllBooks() {
-        var books = bookService.findAll();
-        return ResponseEntity.ok(books);
+    public Flux<BookDto> getAllBooks() {
+        return bookService.findAll();
     }
 
     @GetMapping("/api/v1/books/{id}")
-    public ResponseEntity<BookDto> getBookById(@PathVariable("id") long bookId) {
-        var book = bookService.findById(bookId);
-        return book.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    public Mono<BookDto> getBookById(@PathVariable("id") String bookId) {
+        return bookService.findById(bookId);
     }
 
     @PostMapping("/api/v1/books/add")
-    public ResponseEntity<BookDto> saveNewBook(@RequestBody BookDto dto) {
+    public Mono<BookDto> saveNewBook(@RequestBody BookDto dto) {
         var genreIds = dto.genres()
                 .stream()
                 .map(GenreDto::id)
                 .collect(Collectors.toSet());
-        var savedBook = bookService.insert(dto.title(), dto.author().id(), genreIds);
-        return ResponseEntity.ok(savedBook);
+        return bookService.insert(dto.title(), dto.author().id(), genreIds);
     }
 
     @PutMapping("/api/v1/books/update")
-    public ResponseEntity<BookDto> updateBook(@RequestBody BookDto dto) {
+    public Mono<BookDto> updateBook(@RequestBody BookDto dto) {
         var genreIds = dto.genres()
                 .stream()
                 .map(GenreDto::id)
                 .collect(Collectors.toSet());
-        bookService.update(dto.id(), dto.title(), dto.author().id(), genreIds);
-        return ResponseEntity.ok(dto);
+        return bookService.update(dto.id(), dto.title(), dto.author().id(), genreIds);
+
     }
 
     @DeleteMapping("/api/v1/books/delete/{id}")
-    public void deleteBook(@PathVariable Long id) {
-        bookService.deleteById(id);
+    public Mono<Void> deleteBook(@PathVariable String id) {
+        return bookService.deleteById(id);
     }
 }

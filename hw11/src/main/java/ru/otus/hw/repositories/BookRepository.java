@@ -1,17 +1,7 @@
 package ru.otus.hw.repositories;
 
-import org.springframework.data.jpa.repository.EntityGraph;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
 import ru.otus.hw.models.Book;
 
-import java.util.List;
-import java.util.Optional;
-
-public interface BookRepository extends JpaRepository<Book, Long> {
-
-    @EntityGraph(value = "Book.withAuthorOnly", type = EntityGraph.EntityGraphType.FETCH)
-    List<Book> findAll();
-
-    @EntityGraph(value = "Book.withGenresAndAuthor", type = EntityGraph.EntityGraphType.FETCH)
-    Optional<Book> findById(Long id);
+public interface BookRepository extends ReactiveMongoRepository<Book, String> {
 }

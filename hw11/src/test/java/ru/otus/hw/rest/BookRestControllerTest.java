@@ -1,151 +1,100 @@
 package ru.otus.hw.rest;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.reactive.server.WebTestClient;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import ru.otus.hw.dto.AuthorDto;
 import ru.otus.hw.dto.BookDto;
 import ru.otus.hw.dto.GenreDto;
 import ru.otus.hw.services.BookService;
 
 import java.util.List;
-import java.util.Optional;
 
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.verify;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-
-@WebMvcTest(BookRestController.class)
+@WebFluxTest(BookRestController.class)
 class BookRestControllerTest {
 
     @Autowired
-    private MockMvc mockMvc;
-
-    @Autowired
-    private ObjectMapper objectMapper;
+    private WebTestClient webTestClient;
 
     @MockBean
     private BookService bookService;
 
-    @Test
-    void testGetAllBooks() throws Exception {
-        // Arrange
-        List<BookDto> books = List.of(
-                new BookDto(1L, "Book One", new AuthorDto(1L, "Author One"), List.of(new GenreDto(1L, "Fiction"))),
-                new BookDto(2L, "Book Two", new AuthorDto(2L, "Author Two"), List.of(new GenreDto(2L, "Non-Fiction")))
-        );
-        given(bookService.findAll()).willReturn(books);
+    private final AuthorDto author = new AuthorDto("1", "Author");
+    private final GenreDto genre = new GenreDto("1", "Genre");
+    private final BookDto book = new BookDto("10", "Book Title", author, List.of(genre));
 
-        // Act & Assert
-        mockMvc.perform(get("/api/v1/books")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.length()").value(2))
-                .andExpect(jsonPath("$[0].id").value(1))
-                .andExpect(jsonPath("$[0].title").value("Book One"))
-                .andExpect(jsonPath("$[0].author.id").value(1))
-                .andExpect(jsonPath("$[0].genres[0].id").value(1))
-                .andExpect(jsonPath("$[1].id").value(2))
-                .andExpect(jsonPath("$[1].title").value("Book Two"));
+    @Test
+    void shouldReturnAllBooks() {
+        Mockito.when(bookService.findAll()).thenReturn(Flux.just(book));
+
+        webTestClient.get()
+                .uri("/api/v1/books")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(BookDto.class)
+                .hasSize(1)
+                .contains(book);
     }
 
     @Test
-    void testGetBookByIdFound() throws Exception {
-        // Arrange
-        BookDto book = new BookDto(1L, "Book One", new AuthorDto(1L, "Author One"),
-                List.of(new GenreDto(1L, "Fiction")));
-        given(bookService.findById(1L)).willReturn(Optional.of(book));
+    void shouldReturnBookById() {
+        Mockito.when(bookService.findById("10")).thenReturn(Mono.just(book));
 
-        // Act & Assert
-        mockMvc.perform(get("/api/v1/books/1")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.title").value("Book One"))
-                .andExpect(jsonPath("$.author.id").value(1))
-                .andExpect(jsonPath("$.genres[0].id").value(1));
+        webTestClient.get()
+                .uri("/api/v1/books/10")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(BookDto.class)
+                .isEqualTo(book);
     }
 
     @Test
-    void testGetBookByIdNotFound() throws Exception {
-        // Arrange
-        given(bookService.findById(1L)).willReturn(Optional.empty());
+    void shouldInsertBook() {
+        Mockito.when(bookService.insert(anyString(), anyString(), anySet()))
+                .thenReturn(Mono.just(book));
 
-        // Act & Assert
-        mockMvc.perform(get("/api/v1/books/1")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNotFound());
+        webTestClient.post()
+                .uri("/api/v1/books/add")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(book)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(BookDto.class)
+                .isEqualTo(book);
     }
 
     @Test
-    void testSaveNewBook() throws Exception {
-        // Arrange
-        BookDto inputDto = new BookDto(null, "New Book", new AuthorDto(1L, "Author One"),
-                List.of(new GenreDto(1L, "Fiction")));
-        BookDto savedDto = new BookDto(1L, "New Book", new AuthorDto(1L, "Author One"),
-                List.of(new GenreDto(1L, "Fiction")));
-        given(bookService.insert(anyString(), anyLong(), anySet())).willReturn(savedDto);
+    void shouldUpdateBook() {
+        Mockito.when(bookService.update(anyString(), anyString(), anyString(), anySet()))
+                .thenReturn(Mono.just(book));
 
-        // Act & Assert
-        mockMvc.perform(post("/api/v1/books/add")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(inputDto)))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.title").value("New Book"))
-                .andExpect(jsonPath("$.author.id").value(1))
-                .andExpect(jsonPath("$.genres[0].id").value(1));
+        webTestClient.put()
+                .uri("/api/v1/books/update")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(book)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(BookDto.class)
+                .isEqualTo(book);
     }
 
     @Test
-    void testUpdateBook() throws Exception {
-        // Arrange
-        BookDto inputDto = new BookDto(1L, "Updated Book", new AuthorDto(1L, "Author One"),
-                List.of(new GenreDto(1L, "Fiction")));
-        BookDto updatedDto = new BookDto(1L, "Updated Book", new AuthorDto(1L, "Author One"),
-                List.of(new GenreDto(1L, "Fiction")));
-        given(bookService.update(anyLong(), anyString(), anyLong(), anySet())).willReturn(updatedDto);
+    void shouldDeleteBook() {
+        Mockito.when(bookService.deleteById("10")).thenReturn(Mono.empty());
 
-        // Act & Assert
-        mockMvc.perform(put("/api/v1/books/update")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(inputDto)))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.title").value("Updated Book"))
-                .andExpect(jsonPath("$.author.id").value(1))
-                .andExpect(jsonPath("$.genres[0].id").value(1));
-    }
-
-    @Test
-    void testDeleteBook() throws Exception {
-        // Arrange
-        doNothing().when(bookService).deleteById(1L);
-
-        // Act & Assert
-        mockMvc.perform(delete("/api/v1/books/delete/1")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
-
-        verify(bookService).deleteById(1L);
+        webTestClient.delete()
+                .uri("/api/v1/books/delete/10")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(Void.class);
     }
 }

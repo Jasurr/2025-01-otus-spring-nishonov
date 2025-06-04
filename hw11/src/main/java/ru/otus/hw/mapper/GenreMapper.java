@@ -7,9 +7,6 @@ import ru.otus.hw.models.Genre;
 @Component
 public class GenreMapper {
     public GenreDto toDto(Genre genre) {
-        return new GenreDto(
-                genre.getId(),
-                genre.getName()
-        );
+        return new GenreDto(genre.getId(), genre.getName());
     }
 }

@@ -1,45 +1,41 @@
 package ru.otus.hw.services;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
-import ru.otus.hw.mapper.CommentMapper;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.test.context.ActiveProfiles;
 import ru.otus.hw.models.Book;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@DataJpaTest
-@Transactional(propagation = Propagation.NOT_SUPPORTED)
+@SpringBootTest
+@ActiveProfiles("test")
 @DisplayName("Tests for CommentService")
-@Import({CommentServiceImpl.class, CommentMapper.class})
 class CommentServiceTest {
 
-    private static final long FIRST_BOOK_ID = 1L;
     private static final String COMMENT_MESSAGE = "Test comment";
+
     private static final String UPDATED_COMMENT_MESSAGE = "Updated comment";
 
     @Autowired
     private CommentService commentService;
 
-    @PersistenceContext
-    private EntityManager em;
+    @Autowired
+    private MongoTemplate mongoTemplate;
 
     private Book testBook;
 
     @BeforeEach
-    @DisplayName("Set up a test book")
     void setUp() {
-        testBook = getBookById();
+        testBook = getAnyBook();
+        assertThat(testBook).isNotNull();
     }
+
     @Test
-    @DisplayName("Should find comment by ID without LazyInitializationException")
+    @DisplayName("Should find comment by ID")
     void shouldFindCommentById() {
         var savedComment = commentService.insert(COMMENT_MESSAGE, testBook.getId());
         var foundComment = commentService.findById(savedComment.id());
@@ -51,7 +47,7 @@ class CommentServiceTest {
     }
 
     @Test
-    @DisplayName("Should find comments by book ID without LazyInitializationException")
+    @DisplayName("Should find comments by book ID")
     void shouldFindCommentsByBookId() {
         var savedComment = commentService.insert(COMMENT_MESSAGE, testBook.getId());
         var comments = commentService.findByBookId(testBook.getId());
@@ -64,7 +60,7 @@ class CommentServiceTest {
     }
 
     @Test
-    @DisplayName("Should insert comment correctly")
+    @DisplayName("Should insert comment")
     void shouldInsertComment() {
         var savedComment = commentService.insert(COMMENT_MESSAGE, testBook.getId());
 
@@ -74,7 +70,7 @@ class CommentServiceTest {
     }
 
     @Test
-    @DisplayName("Should update comment message")
+    @DisplayName("Should update comment")
     void shouldUpdateComment() {
         var savedComment = commentService.insert(COMMENT_MESSAGE, testBook.getId());
         var updatedComment = commentService.update(savedComment.id(), UPDATED_COMMENT_MESSAGE);
@@ -85,7 +81,7 @@ class CommentServiceTest {
     }
 
     @Test
-    @DisplayName("Should delete comment from database")
+    @DisplayName("Should delete comment")
     void shouldDeleteComment() {
         var savedComment = commentService.insert(COMMENT_MESSAGE, testBook.getId());
         commentService.deleteById(savedComment.id());
@@ -94,13 +90,10 @@ class CommentServiceTest {
         assertThat(deletedComment).isEmpty();
     }
 
-    @Transactional(readOnly = true)
-    protected Book getBookById() {
-        var book = em.find(Book.class, FIRST_BOOK_ID);
-        assertThat(book)
-                .as("Book with ID " + FIRST_BOOK_ID + " not found")
-                .isNotNull();
-        return book;
+    private Book getAnyBook() {
+        return mongoTemplate.findAll(Book.class).stream()
+                .filter(b -> b.getId() != null)
+                .findFirst()
+                .orElse(null);
     }
-
 }

@@ -1,15 +1,15 @@
 package ru.otus.hw.services;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import ru.otus.hw.config.TestMongockConfig;
 import ru.otus.hw.mapper.BookMapper;
 import ru.otus.hw.models.Author;
 import ru.otus.hw.models.Genre;
@@ -18,20 +18,24 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@DataJpaTest
-@Transactional(propagation = Propagation.NOT_SUPPORTED)
-@Import({BookServiceImpl.class, BookMapper.class})
-@DisplayName("Book Service Tests")
+@DataMongoTest
+@Import({TestMongockConfig.class, BookServiceImpl.class, BookMapper.class})
+@DisplayName("Book Service Tests for MongoDB")
 class BookServiceTest {
-    private static final long FIRST_AUTHOR_ID = 1L;
-    private static final long FIRST_GENRE_ID = 1L;
+
     private static final String TEST_BOOK_TITLE = "Test Book";
+
     private static final String UPDATED_BOOK_TITLE = "Updated Book";
+
+    private static final String TEST_AUTHOR_NAME = "Author 1";
+
+    private static final String TEST_GENRE_NAME = "Genre 1";
 
     @Autowired
     private BookService bookService;
-    @PersistenceContext
-    private EntityManager em;
+
+    @Autowired
+    private MongoTemplate mongoTemplate;
 
     private Author author;
     private Genre genre;
@@ -39,9 +43,18 @@ class BookServiceTest {
     @BeforeEach
     @DisplayName("Setup common test data")
     void setUp() {
-        // Preload common test data
-        author = getAuthorById();
-        genre = getGenreById();
+        // Fetch Author and Genre from migrated data
+        author = mongoTemplate.findOne(
+                Query.query(Criteria.where("fullName").is(TEST_AUTHOR_NAME)), Author.class);
+        assertThat(author)
+                .as("Author with name " + TEST_AUTHOR_NAME + " not found")
+                .isNotNull();
+
+        genre = mongoTemplate.findOne(
+                Query.query(Criteria.where("name").is(TEST_GENRE_NAME)), Genre.class);
+        assertThat(genre)
+                .as("Genre with name " + TEST_GENRE_NAME + " not found")
+                .isNotNull();
     }
 
     @Test
@@ -55,7 +68,7 @@ class BookServiceTest {
                 .get()
                 .hasFieldOrPropertyWithValue("title", TEST_BOOK_TITLE)
                 .hasFieldOrPropertyWithValue("author.id", author.getId())
-                .satisfies(book -> assertThat(book.genres()).anyMatch(g -> g.id() == genre.getId()));
+                .satisfies(book -> assertThat(book.genres()).anyMatch(g -> g.id().equals(genre.getId())));
     }
 
     @Test
@@ -76,7 +89,7 @@ class BookServiceTest {
                 .isNotNull()
                 .hasFieldOrPropertyWithValue("title", TEST_BOOK_TITLE)
                 .hasFieldOrPropertyWithValue("author.id", author.getId())
-                .satisfies(book -> assertThat(book.genres()).anyMatch(g -> g.id() == genre.getId()));
+                .satisfies(book -> assertThat(book.genres()).anyMatch(g -> g.id().equals(genre.getId())));
     }
 
     @Test
@@ -89,7 +102,7 @@ class BookServiceTest {
                 .isNotNull()
                 .hasFieldOrPropertyWithValue("title", UPDATED_BOOK_TITLE)
                 .hasFieldOrPropertyWithValue("author.id", author.getId())
-                .satisfies(book -> assertThat(book.genres()).anyMatch(g -> g.id() == genre.getId()));
+                .satisfies(book -> assertThat(book.genres()).anyMatch(g -> g.id().equals(genre.getId())));
     }
 
     @Test
@@ -100,23 +113,5 @@ class BookServiceTest {
 
         var deletedBook = bookService.findById(insertedBook.id());
         assertThat(deletedBook).isEmpty();
-    }
-
-    @Transactional(readOnly = true)
-    protected Author getAuthorById() {
-        var author = em.find(Author.class, FIRST_AUTHOR_ID);
-        assertThat(author)
-                .as("Author with ID " + FIRST_AUTHOR_ID + " not found")
-                .isNotNull();
-        return author;
-    }
-
-    @Transactional(readOnly = true)
-    protected Genre getGenreById() {
-        var genre = em.find(Genre.class, FIRST_GENRE_ID);
-        assertThat(genre)
-                .as("Genre with ID " + FIRST_GENRE_ID + " not found")
-                .isNotNull();
-        return genre;
     }
 }

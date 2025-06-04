@@ -1,27 +1,11 @@
 spring:
-  datasource:
-    url: jdbc:h2:mem:testdb
-  h2:
-    console:
-      enabled: true
-  liquibase:
-    enabled: true
-    change-log: classpath:db/changelog/db.changelog-master.yml
-  sql:
-    init:
-      mode: never
-  jpa:
-    show-sql: false
-    properties:
-      hibernate:
-        ddl-auto: none
-        jdbc:
-          batch_size: 20
-        order_inserts: true
-        order_updates: true
-        format_sql: true
-        use_sql_comments: true
-logging:
-  level:
-    org.hibernate.SQL: DEBUG
-    org.hibernate.orm.jdbc.bind: TRACE
+  data:
+    mongodb:
+      database: testdb
+  shell:
+    interactive:
+      enabled: false
+
+mongock:
+  enabled: true
+  migration-scan-package: ru.otus.hw.migration

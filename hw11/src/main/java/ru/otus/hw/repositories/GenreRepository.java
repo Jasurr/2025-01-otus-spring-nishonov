@@ -1,11 +1,11 @@
 package ru.otus.hw.repositories;
 
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
+import reactor.core.publisher.Flux;
 import ru.otus.hw.models.Genre;
 
-import java.util.List;
 import java.util.Set;
 
-public interface GenreRepository extends JpaRepository<Genre, Long> {
-    List<Genre> findAllByIdIn(Set<Long> ids);
+public interface GenreRepository extends ReactiveMongoRepository<Genre, String> {
+    Flux<Genre> findAllByIdIn(Set<String> ids);
 }

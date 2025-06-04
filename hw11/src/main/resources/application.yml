@@ -1,28 +1,15 @@
 spring:
-  datasource:
-    url: jdbc:h2:mem:maindb
-  h2:
-    console:
-      enabled: true
-  liquibase:
-    enabled: true
-    change-log: classpath:db/changelog/db.changelog-master.yml
-  sql:
-    init:
-      mode: never
-  jpa:
-    show-sql: false
-    properties:
-      hibernate:
-        ddl-auto: none
-        jdbc:
-          batch_size: 20
-        order_inserts: true
-        order_updates: true
-        format_sql: true
-        use_sql_comments: true
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/book_db
+      database: book_db
+
+mongock:
+  runner-type: InitializingBean
+  enabled: true
+  migration-scan-package: ru.otus.hw.migration
 
 logging:
   level:
-    org.hibernate.SQL: DEBUG
-    org.hibernate.orm.jdbc.bind: TRACE
+    org.springframework.data.mongodb: DEBUG
+    com.mongodb: DEBUG
