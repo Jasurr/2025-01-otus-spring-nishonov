@@ -9,24 +9,26 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.test.annotation.DirtiesContext;
 import ru.otus.hw.config.TestMongockConfig;
 import ru.otus.hw.models.Author;
 import ru.otus.hw.models.Book;
 import ru.otus.hw.models.Genre;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataMongoTest
 @Import(TestMongockConfig.class)
 @DisplayName("Book Repository Tests for MongoDB")
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class BookRepositoryTest {
 
     private static final String TEST_BOOK_TITLE = "Sample Book";
-
+    private static final String TEST_BOOK_TITLE_2 = "Sample Book 2";
     private static final String TEST_AUTHOR_NAME = "Author 1";
-
     private static final String TEST_GENRE_NAME = "Genre 1";
 
     @Autowired
@@ -35,102 +37,179 @@ class BookRepositoryTest {
     @Autowired
     private MongoTemplate mongoTemplate;
 
-    private Author author;
-
-    private Genre genre;
+    private Author testAuthor;
+    private Genre testGenre;
 
     @BeforeEach
     void setUp() {
-        // Fetch Author and Genre from migrated data
-        author = mongoTemplate.findOne(
-                Query.query(Criteria.where("fullName").is(TEST_AUTHOR_NAME)), Author.class);
-        assertThat(author)
-                .as("Author with name " + TEST_AUTHOR_NAME + " not found")
-                .isNotNull();
+        // Clean up any existing test data
+        mongoTemplate.remove(Query.query(Criteria.where("title").regex("^" + TEST_BOOK_TITLE)), Book.class);
 
-        genre = mongoTemplate.findOne(
-                Query.query(Criteria.where("name").is(TEST_GENRE_NAME)), Genre.class);
-        assertThat(genre)
-                .as("Genre with name " + TEST_GENRE_NAME + " not found")
-                .isNotNull();
+        // Fetch reference data once
+        testAuthor = findAuthorByName(TEST_AUTHOR_NAME);
+        testGenre = findGenreByName(TEST_GENRE_NAME);
     }
 
     @Test
-    @DisplayName("Should save a book successfully using MongoTemplate")
+    @DisplayName("Should save a book successfully")
     void shouldSaveBook() {
-        Book book = createTestBook();
+        // Given
+        Book book = createTestBook(TEST_BOOK_TITLE);
+
+        // When
         Book savedBook = bookRepository.save(book);
 
-        assertThat(savedBook.getId()).isNotNull().isNotBlank();
-        assertThat(savedBook.getTitle()).isEqualTo(TEST_BOOK_TITLE);
-        assertThat(savedBook.getAuthor()).isEqualTo(author);
-        assertThat(savedBook.getGenres()).containsExactly(genre);
-
-        Book foundBook = mongoTemplate.findById(savedBook.getId(), Book.class);
-        assertThat(foundBook).isNotNull();
-        assertThat(foundBook.getId()).isEqualTo(savedBook.getId());
-        assertThat(foundBook.getTitle()).isEqualTo(savedBook.getTitle());
-        assertThat(foundBook.getAuthor().getId()).isEqualTo(savedBook.getAuthor().getId());
-        List<String> savedGenreIds = savedBook.getGenres().stream().map(Genre::getId).toList();
-        List<String> foundGenreIds = foundBook.getGenres().stream().map(Genre::getId).toList();
-        assertThat(foundGenreIds).containsExactlyInAnyOrderElementsOf(savedGenreIds);
+        // Then
+        assertBookIsSavedCorrectly(savedBook, TEST_BOOK_TITLE);
+        verifyBookExistsInDatabase(savedBook);
     }
 
     @Test
-    @DisplayName("Should find a book by ID using MongoTemplate")
+    @DisplayName("Should find a book by ID")
     void shouldFindById() {
-        Book existingBook = mongoTemplate.findOne(
-                Query.query(Criteria.where("title").is(TEST_BOOK_TITLE)), Book.class);
-        assertThat(existingBook)
-                .as("Book with title " + TEST_BOOK_TITLE + " not found in the database")
-                .isNotNull();
+        // Given - use MongoTemplate to set up test data
+        Book testBook = createTestBook(TEST_BOOK_TITLE);
+        Book savedBook = mongoTemplate.save(testBook);
 
-        Book foundBook = mongoTemplate.findById(existingBook.getId(), Book.class);
+        // When - test the repository method
+        Optional<Book> foundBook = bookRepository.findById(savedBook.getId());
 
-        assertThat(foundBook).isNotNull();
-        assertThat(foundBook.getId()).isEqualTo(existingBook.getId());
-        assertThat(foundBook.getTitle()).isEqualTo(existingBook.getTitle());
-        assertThat(foundBook.getAuthor().getId()).isEqualTo(existingBook.getAuthor().getId());
-
-        List<String> existingGenreIds = existingBook.getGenres().stream().map(Genre::getId).toList();
-        List<String> foundGenreIds = foundBook.getGenres().stream().map(Genre::getId).toList();
-        assertThat(foundGenreIds).containsExactlyInAnyOrderElementsOf(existingGenreIds);
+        // Then - verify using assertions
+        assertThat(foundBook)
+                .isPresent()
+                .get()
+                .satisfies(book -> assertBooksAreEqual(book, savedBook));
     }
 
     @Test
-    @DisplayName("Should find all books with related data using MongoTemplate")
+    @DisplayName("Should find all books with complete data")
     void shouldFindAll() {
-        Book book1 = createTestBook();
-        Book book2 = new Book(null, TEST_BOOK_TITLE + " 2", author, List.of(genre));
-        mongoTemplate.save(book1);
-        mongoTemplate.save(book2);
+        // Given - use MongoTemplate to set up test data
+        Book book1 = mongoTemplate.save(createTestBook(TEST_BOOK_TITLE));
+        Book book2 = mongoTemplate.save(createTestBook(TEST_BOOK_TITLE_2));
 
-        List<Book> books = mongoTemplate.findAll(Book.class);
+        // When - test the repository method
+        List<Book> allBooks = bookRepository.findAll();
 
-        assertThat(books)
-                .isNotEmpty()
+        // Then
+        assertThat(allBooks)
                 .hasSizeGreaterThanOrEqualTo(2)
-                .allMatch(b -> b.getTitle() != null && !b.getTitle().isEmpty())
-                .allMatch(b -> b.getAuthor() != null && b.getAuthor().getId() != null)
-                .allMatch(b -> b.getGenres() != null && !b.getGenres().isEmpty());
+                .allSatisfy(this::assertBookHasCompleteData)
+                .extracting(Book::getTitle)
+                .contains(TEST_BOOK_TITLE, TEST_BOOK_TITLE_2);
     }
 
     @Test
-    @DisplayName("Should delete a book by ID using MongoTemplate")
+    @DisplayName("Should delete a book by ID")
     void shouldDeleteById() {
-        var book = mongoTemplate.findOne(
-                Query.query(Criteria.where("title").is(TEST_BOOK_TITLE)), Book.class);
-        assertThat(book).isNotNull();
-        bookRepository.deleteById(book.getId());
+        // Given - use MongoTemplate to set up test data
+        Book testBook = createTestBook(TEST_BOOK_TITLE);
+        Book savedBook = mongoTemplate.save(testBook);
+        String bookId = savedBook.getId();
 
-        assertThat(bookRepository.findById(book.getId())).isEmpty();
+        // When - test the repository method
+        bookRepository.deleteById(bookId);
+
+        // Then - verify using MongoTemplate
+        Book deletedBook = mongoTemplate.findById(bookId, Book.class);
+        assertThat(deletedBook).isNull();
     }
 
-    private Book createTestBook() {
-        Book book = new Book();
-        book.setTitle(TEST_BOOK_TITLE);
-        book.setAuthor(author);
-        book.setGenres(List.of(genre));
-        return book;
+    @Test
+    @DisplayName("Should handle non-existent book ID gracefully")
+    void shouldHandleNonExistentId() {
+        // Given
+        String nonExistentId = "507f1f77bcf86cd799439011";
+
+        // When & Then - test repository method with non-existent ID
+        assertThat(bookRepository.findById(nonExistentId)).isEmpty();
+
+        // Verify using MongoTemplate as well
+        Book foundBook = mongoTemplate.findById(nonExistentId, Book.class);
+        assertThat(foundBook).isNull();
+    }
+
+    // Helper methods
+    private Author findAuthorByName(String name) {
+        Author author = mongoTemplate.findOne(
+                Query.query(Criteria.where("fullName").is(name)), Author.class);
+        assertThat(author)
+                .as("Author with name '%s' should exist in test data", name)
+                .isNotNull();
+        return author;
+    }
+
+    private Genre findGenreByName(String name) {
+        Genre genre = mongoTemplate.findOne(
+                Query.query(Criteria.where("name").is(name)), Genre.class);
+        assertThat(genre)
+                .as("Genre with name '%s' should exist in test data", name)
+                .isNotNull();
+        return genre;
+    }
+
+    private Book createTestBook(String title) {
+        return new Book(null, title, testAuthor, List.of(testGenre));
+    }
+
+    private void assertBookIsSavedCorrectly(Book savedBook, String expectedTitle) {
+        assertThat(savedBook.getId())
+                .as("Saved book should have a generated ID")
+                .isNotNull()
+                .isNotBlank();
+
+        assertThat(savedBook.getTitle())
+                .as("Saved book should have correct title")
+                .isEqualTo(expectedTitle);
+
+        assertThat(savedBook.getAuthor())
+                .as("Saved book should have correct author")
+                .isEqualTo(testAuthor);
+
+        assertThat(savedBook.getGenres())
+                .as("Saved book should have correct genres")
+                .containsExactly(testGenre);
+    }
+
+    private void verifyBookExistsInDatabase(Book savedBook) {
+        Book foundBook = mongoTemplate.findById(savedBook.getId(), Book.class);
+        assertThat(foundBook)
+                .as("Book should exist in database after saving")
+                .isNotNull();
+        assertBooksAreEqual(foundBook, savedBook);
+    }
+
+    private void assertBooksAreEqual(Book actual, Book expected) {
+        assertThat(actual.getId()).isEqualTo(expected.getId());
+        assertThat(actual.getTitle()).isEqualTo(expected.getTitle());
+        assertThat(actual.getAuthor().getId()).isEqualTo(expected.getAuthor().getId());
+
+        List<String> actualGenreIds = actual.getGenres().stream()
+                .map(Genre::getId)
+                .toList();
+        List<String> expectedGenreIds = expected.getGenres().stream()
+                .map(Genre::getId)
+                .toList();
+
+        assertThat(actualGenreIds)
+                .containsExactlyInAnyOrderElementsOf(expectedGenreIds);
+    }
+
+    private void assertBookHasCompleteData(Book book) {
+        assertThat(book.getTitle())
+                .as("Book title should not be null or empty")
+                .isNotNull()
+                .isNotBlank();
+
+        assertThat(book.getAuthor())
+                .as("Book author should not be null")
+                .isNotNull()
+                .satisfies(author -> assertThat(author.getId()).isNotNull());
+
+        assertThat(book.getGenres())
+                .as("Book genres should not be null or empty")
+                .isNotNull()
+                .isNotEmpty()
+                .allSatisfy(genre -> assertThat(genre.getId()).isNotNull());
     }
 }
