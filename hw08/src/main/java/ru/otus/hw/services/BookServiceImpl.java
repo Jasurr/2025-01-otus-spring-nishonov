@@ -8,7 +8,6 @@ import ru.otus.hw.exceptions.EntityNotFoundException;
 import ru.otus.hw.mapper.BookMapper;
 import ru.otus.hw.models.Author;
 import ru.otus.hw.models.Book;
-import ru.otus.hw.models.Comment;
 import ru.otus.hw.models.Genre;
 import ru.otus.hw.repositories.AuthorRepository;
 import ru.otus.hw.repositories.BookRepository;
@@ -132,11 +131,7 @@ public class BookServiceImpl implements BookService {
     }
 
     private void updateCommentsWithBook(String bookId, BookDto updatedBookDto) {
-        List<Comment> comments = commentRepository.findByBookId(bookId);
         Book updatedBook = bookMapper.toEntity(updatedBookDto);
-        for (Comment comment : comments) {
-            comment.setBook(updatedBook);
-            commentRepository.save(comment);
-        }
+        commentRepository.updateCommentsByBookId(bookId, updatedBook);
     }
 }

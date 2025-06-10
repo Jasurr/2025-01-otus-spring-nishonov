@@ -4,15 +4,17 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.test.context.ActiveProfiles;
+import ru.otus.hw.config.TestMongockConfig;
+import ru.otus.hw.mapper.CommentMapper;
 import ru.otus.hw.models.Book;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest
-@ActiveProfiles("test")
+@DataMongoTest
+@Import({CommentServiceImpl.class, TestMongockConfig.class, CommentMapper.class})
 @DisplayName("Tests for CommentService")
 class CommentServiceTest {
 

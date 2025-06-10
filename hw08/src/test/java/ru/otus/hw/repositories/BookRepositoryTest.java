@@ -9,7 +9,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.test.annotation.DirtiesContext;
 import ru.otus.hw.config.TestMongockConfig;
 import ru.otus.hw.models.Author;
 import ru.otus.hw.models.Book;
@@ -23,7 +22,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DataMongoTest
 @Import(TestMongockConfig.class)
 @DisplayName("Book Repository Tests for MongoDB")
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class BookRepositoryTest {
 
     private static final String TEST_BOOK_TITLE = "Sample Book";
@@ -46,8 +44,8 @@ class BookRepositoryTest {
         mongoTemplate.remove(Query.query(Criteria.where("title").regex("^" + TEST_BOOK_TITLE)), Book.class);
 
         // Fetch reference data once
-        testAuthor = findAuthorByName(TEST_AUTHOR_NAME);
-        testGenre = findGenreByName(TEST_GENRE_NAME);
+        testAuthor = findAuthorByName();
+        testGenre = findGenreByName();
     }
 
     @Test
@@ -60,7 +58,7 @@ class BookRepositoryTest {
         Book savedBook = bookRepository.save(book);
 
         // Then
-        assertBookIsSavedCorrectly(savedBook, TEST_BOOK_TITLE);
+        assertBookIsSavedCorrectly(savedBook);
         verifyBookExistsInDatabase(savedBook);
     }
 
@@ -85,8 +83,8 @@ class BookRepositoryTest {
     @DisplayName("Should find all books with complete data")
     void shouldFindAll() {
         // Given - use MongoTemplate to set up test data
-        Book book1 = mongoTemplate.save(createTestBook(TEST_BOOK_TITLE));
-        Book book2 = mongoTemplate.save(createTestBook(TEST_BOOK_TITLE_2));
+        mongoTemplate.save(createTestBook(TEST_BOOK_TITLE));
+        mongoTemplate.save(createTestBook(TEST_BOOK_TITLE_2));
 
         // When - test the repository method
         List<Book> allBooks = bookRepository.findAll();
@@ -130,20 +128,20 @@ class BookRepositoryTest {
     }
 
     // Helper methods
-    private Author findAuthorByName(String name) {
+    private Author findAuthorByName() {
         Author author = mongoTemplate.findOne(
-                Query.query(Criteria.where("fullName").is(name)), Author.class);
+                Query.query(Criteria.where("fullName").is(TEST_AUTHOR_NAME)), Author.class);
         assertThat(author)
-                .as("Author with name '%s' should exist in test data", name)
+                .as("Author with name '%s' should exist in test data", TEST_AUTHOR_NAME)
                 .isNotNull();
         return author;
     }
 
-    private Genre findGenreByName(String name) {
+    private Genre findGenreByName() {
         Genre genre = mongoTemplate.findOne(
-                Query.query(Criteria.where("name").is(name)), Genre.class);
+                Query.query(Criteria.where("name").is(TEST_GENRE_NAME)), Genre.class);
         assertThat(genre)
-                .as("Genre with name '%s' should exist in test data", name)
+                .as("Genre with name '%s' should exist in test data", TEST_GENRE_NAME)
                 .isNotNull();
         return genre;
     }
@@ -152,7 +150,7 @@ class BookRepositoryTest {
         return new Book(null, title, testAuthor, List.of(testGenre));
     }
 
-    private void assertBookIsSavedCorrectly(Book savedBook, String expectedTitle) {
+    private void assertBookIsSavedCorrectly(Book savedBook) {
         assertThat(savedBook.getId())
                 .as("Saved book should have a generated ID")
                 .isNotNull()
@@ -160,7 +158,7 @@ class BookRepositoryTest {
 
         assertThat(savedBook.getTitle())
                 .as("Saved book should have correct title")
-                .isEqualTo(expectedTitle);
+                .isEqualTo(TEST_BOOK_TITLE);
 
         assertThat(savedBook.getAuthor())
                 .as("Saved book should have correct author")
