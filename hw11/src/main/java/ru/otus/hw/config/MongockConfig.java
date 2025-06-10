@@ -8,11 +8,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import ru.otus.hw.migration.InitialDataMigration;
 
 @Configuration
 public class MongockConfig {
-    private static final Logger LOGGER = LoggerFactory.getLogger(InitialDataMigration.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MongockConfig.class);
     @Value("${spring.data.mongodb.database}")
     private String databaseName;
 
