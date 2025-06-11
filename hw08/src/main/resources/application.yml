@@ -1,0 +1,15 @@
+spring:
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/book_db
+      database: book_db
+
+mongock:
+  runner-type: InitializingBean
+  enabled: true
+  migration-scan-package: ru.otus.hw.migration
+
+logging:
+  level:
+    org.springframework.data.mongodb: DEBUG
+    com.mongodb: DEBUG
