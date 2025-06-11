@@ -88,7 +88,7 @@ class CommentRestControllerTest {
         given(commentService.insert(anyString(), anyLong())).willReturn(newComment);
 
         // Act & Assert
-        mockMvc.perform(post("/api/v1/book/comments/1/add")
+        mockMvc.perform(post("/api/v1/book/comments/1")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("message", "Nice book!"))
                 .andExpect(status().isOk());
@@ -101,7 +101,7 @@ class CommentRestControllerTest {
         given(commentService.update(anyLong(), anyString())).willReturn(updatedComment);
 
         // Act & Assert
-        mockMvc.perform(put("/api/v1/book/comments/1/update")
+        mockMvc.perform(put("/api/v1/book/comments/1")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("message", "Updated comment"))
                 .andExpect(status().isOk());
@@ -113,7 +113,7 @@ class CommentRestControllerTest {
         doNothing().when(commentService).deleteById(1L);
 
         // Act & Assert
-        mockMvc.perform(delete("/api/v1/book/comments/1/delete")
+        mockMvc.perform(delete("/api/v1/book/comments/1")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
     }

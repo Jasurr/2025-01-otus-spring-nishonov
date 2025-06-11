@@ -31,7 +31,7 @@ public class CommentRestController {
         return ResponseEntity.ok(commentService.findByBookId(bookId));
     }
 
-    @PostMapping("/api/v1/book/comments/{bookId}/add")
+    @PostMapping("/api/v1/book/comments/{bookId}")
     public ResponseEntity<Void> addComment(
             @PathVariable("bookId") Long bookId,
             @RequestParam("message") String message) {
@@ -39,14 +39,14 @@ public class CommentRestController {
         return ResponseEntity.ok().build();
     }
 
-    @PutMapping("/api/v1/book/comments/{commentId}/update")
+    @PutMapping("/api/v1/book/comments/{commentId}")
     public ResponseEntity<Void> updateComment(@PathVariable("commentId") Long commentId,
                                               @RequestParam("message") String message) {
         commentService.update(commentId, message);
         return ResponseEntity.ok().build();
     }
 
-    @DeleteMapping("/api/v1/book/comments/{commentId}/delete")
+    @DeleteMapping("/api/v1/book/comments/{commentId}")
     public ResponseEntity<Void> deleteComment(@PathVariable("commentId") Long commentId) {
         commentService.deleteById(commentId);
         return ResponseEntity.ok().build();

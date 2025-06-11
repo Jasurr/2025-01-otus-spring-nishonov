@@ -104,7 +104,7 @@ class BookRestControllerTest {
         given(bookService.insert(anyString(), anyLong(), anySet())).willReturn(savedDto);
 
         // Act & Assert
-        mockMvc.perform(post("/api/v1/books/add")
+        mockMvc.perform(post("/api/v1/books")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(inputDto)))
                 .andExpect(status().isOk())
@@ -125,7 +125,7 @@ class BookRestControllerTest {
         given(bookService.update(anyLong(), anyString(), anyLong(), anySet())).willReturn(updatedDto);
 
         // Act & Assert
-        mockMvc.perform(put("/api/v1/books/update")
+        mockMvc.perform(put("/api/v1/books")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(inputDto)))
                 .andExpect(status().isOk())
@@ -142,7 +142,7 @@ class BookRestControllerTest {
         doNothing().when(bookService).deleteById(1L);
 
         // Act & Assert
-        mockMvc.perform(delete("/api/v1/books/delete/1")
+        mockMvc.perform(delete("/api/v1/books/1")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 

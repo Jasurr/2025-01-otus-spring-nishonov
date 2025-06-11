@@ -46,7 +46,7 @@ const CommentForm = () => {
         const formData = new FormData();
         formData.append('message', message);
 
-        fetch(`/api/v1/book/comments/${commentId}/update`, {
+        fetch(`/api/v1/book/comments/${commentId}`, {
             method: 'PUT',
             body: formData
         })

@@ -42,7 +42,7 @@ const CommentList = () => {
         const formData = new FormData();
         formData.append('message', newComment);
 
-        fetch(`/api/v1/book/comments/${bookId}/add`, {
+        fetch(`/api/v1/book/comments/${bookId}`, {
             method: 'POST',
             body: formData
         })
@@ -70,7 +70,7 @@ const CommentList = () => {
             return;
         }
 
-        fetch(`/api/v1/book/comments/${commentId}/delete`, {
+        fetch(`/api/v1/book/comments/${commentId}`, {
             method: 'DELETE'
         })
             .then(response => {

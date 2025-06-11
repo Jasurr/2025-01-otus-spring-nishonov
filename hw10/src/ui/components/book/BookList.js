@@ -15,7 +15,7 @@ export default class BookList extends React.Component {
 
     deleteBookById(bookId) {
         if (window.confirm('Are you sure you want to delete this book?')) {
-            fetch(`/api/v1/books/delete/${bookId}`, {
+            fetch(`/api/v1/books/${bookId}`, {
                 method: 'DELETE'
             })
                 .then(response => {
@@ -30,7 +30,7 @@ export default class BookList extends React.Component {
                     }
                 })
                 .catch(error => {
-                    alert(error.message); // Xato xabarini ko'rsatish
+                    alert(error.message);
                 });
         }
     }

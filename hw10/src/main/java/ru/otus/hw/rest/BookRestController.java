@@ -33,7 +33,7 @@ public class BookRestController {
         return book.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @PostMapping("/api/v1/books/add")
+    @PostMapping("/api/v1/books")
     public ResponseEntity<BookDto> saveNewBook(@RequestBody BookDto dto) {
         var genreIds = dto.genres()
                 .stream()
@@ -43,7 +43,7 @@ public class BookRestController {
         return ResponseEntity.ok(savedBook);
     }
 
-    @PutMapping("/api/v1/books/update")
+    @PutMapping("/api/v1/books")
     public ResponseEntity<BookDto> updateBook(@RequestBody BookDto dto) {
         var genreIds = dto.genres()
                 .stream()
@@ -53,7 +53,7 @@ public class BookRestController {
         return ResponseEntity.ok(dto);
     }
 
-    @DeleteMapping("/api/v1/books/delete/{id}")
+    @DeleteMapping("/api/v1/books/{id}")
     public void deleteBook(@PathVariable Long id) {
         bookService.deleteById(id);
     }
