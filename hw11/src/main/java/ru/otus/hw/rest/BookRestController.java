@@ -1,6 +1,7 @@
 package ru.otus.hw.rest;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -15,7 +16,7 @@ import java.util.stream.Collectors;
 public class BookRestController {
     private final BookService bookService;
 
-    @GetMapping("/api/v1/books")
+    @GetMapping( "/api/v1/books")
     public Flux<BookDto> getAllBooks() {
         return bookService.findAll();
     }
@@ -25,7 +26,7 @@ public class BookRestController {
         return bookService.findById(bookId);
     }
 
-    @PostMapping("/api/v1/books/add")
+    @PostMapping("/api/v1/books")
     public Mono<BookDto> saveNewBook(@RequestBody BookDto dto) {
         var genreIds = dto.genres()
                 .stream()
@@ -34,7 +35,7 @@ public class BookRestController {
         return bookService.insert(dto.title(), dto.author().id(), genreIds);
     }
 
-    @PutMapping("/api/v1/books/update")
+    @PutMapping("/api/v1/books")
     public Mono<BookDto> updateBook(@RequestBody BookDto dto) {
         var genreIds = dto.genres()
                 .stream()
@@ -44,7 +45,7 @@ public class BookRestController {
 
     }
 
-    @DeleteMapping("/api/v1/books/delete/{id}")
+    @DeleteMapping("/api/v1/books/{id}")
     public Mono<Void> deleteBook(@PathVariable String id) {
         return bookService.deleteById(id);
     }

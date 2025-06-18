@@ -2,49 +2,47 @@ package ru.otus.hw.rest;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.reactive.server.WebTestClient;
+import reactor.core.publisher.Flux;
 import ru.otus.hw.dto.AuthorDto;
 import ru.otus.hw.services.AuthorService;
 
 import java.util.List;
 
 import static org.mockito.BDDMockito.given;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-
-@WebMvcTest(AuthorRestController.class)
+@WebFluxTest(AuthorRestController.class)
 class AuthorRestControllerTest {
-    @Autowired
-    private MockMvc mockMvc;
 
+    @Autowired
+    private WebTestClient webTestClient;
 
     @MockBean
     private AuthorService authorService;
 
     @Test
-    void testGetAllAuthors() throws Exception {
-        // Arrange
+    void testGetAllAuthors() {
         List<AuthorDto> authors = List.of(
-                new AuthorDto(1L, "Author One"),
-                new AuthorDto(2L, "Author Two")
+                new AuthorDto("68498f529934676eff037aa1", "Author One"),
+                new AuthorDto("68498f529934676eff037aa2", "Author Two")
         );
-        given(authorService.findAll()).willReturn(authors);
+        given(authorService.findAll()).willReturn(Flux.fromIterable(authors));
 
-        // Act & Assert
-        mockMvc.perform(get("/api/v1/authors")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.length()").value(2))
-                .andExpect(jsonPath("$[0].id").value(1))
-                .andExpect(jsonPath("$[0].fullName").value("Author One"))
-                .andExpect(jsonPath("$[1].id").value(2))
-                .andExpect(jsonPath("$[1].fullName").value("Author Two"));
+        webTestClient.get()
+                .uri("/api/v1/authors")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBodyList(AuthorDto.class)
+                .value(list -> {
+                    assert list.get(0).id().equals("68498f529934676eff037aa1");
+                    assert list.get(0).fullName().equals("Author One");
+                    assert list.get(1).id().equals("68498f529934676eff037aa2");
+                    assert list.get(1).fullName().equals("Author Two");
+                });
     }
 }

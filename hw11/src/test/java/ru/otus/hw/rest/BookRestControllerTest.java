@@ -1,7 +1,6 @@
 package ru.otus.hw.rest;
 
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -15,9 +14,9 @@ import ru.otus.hw.dto.GenreDto;
 import ru.otus.hw.services.BookService;
 
 import java.util.List;
+import java.util.Set;
 
-import static org.mockito.ArgumentMatchers.anySet;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.BDDMockito.given;
 
 @WebFluxTest(BookRestController.class)
 class BookRestControllerTest {
@@ -33,68 +32,102 @@ class BookRestControllerTest {
     private final BookDto book = new BookDto("10", "Book Title", author, List.of(genre));
 
     @Test
-    void shouldReturnAllBooks() {
-        Mockito.when(bookService.findAll()).thenReturn(Flux.just(book));
+    void testGetAllBooks() {
+        given(bookService.findAll()).willReturn(Flux.just(book));
 
         webTestClient.get()
                 .uri("/api/v1/books")
+                .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBodyList(BookDto.class)
                 .hasSize(1)
-                .contains(book);
+                .value(list -> {
+                    assert list.get(0).id().equals("10");
+                    assert list.get(0).title().equals("Book Title");
+                    assert list.get(0).author().id().equals("1");
+                    assert list.get(0).author().fullName().equals("Author");
+                    assert list.get(0).genres().get(0).id().equals("1");
+                    assert list.get(0).genres().get(0).name().equals("Genre");
+                });
     }
 
     @Test
-    void shouldReturnBookById() {
-        Mockito.when(bookService.findById("10")).thenReturn(Mono.just(book));
+    void testGetBookById() {
+        given(bookService.findById("10")).willReturn(Mono.just(book));
 
         webTestClient.get()
                 .uri("/api/v1/books/10")
+                .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody(BookDto.class)
-                .isEqualTo(book);
+                .value(bookDto -> {
+                    assert bookDto.id().equals("10");
+                    assert bookDto.title().equals("Book Title");
+                    assert bookDto.author().id().equals("1");
+                    assert bookDto.author().fullName().equals("Author");
+                    assert bookDto.genres().get(0).id().equals("1");
+                    assert bookDto.genres().get(0).name().equals("Genre");
+                });
     }
 
     @Test
-    void shouldInsertBook() {
-        Mockito.when(bookService.insert(anyString(), anyString(), anySet()))
-                .thenReturn(Mono.just(book));
+    void testInsertBook() {
+        given(bookService.insert("Book Title", "1", Set.of("1")))
+                .willReturn(Mono.just(book));
 
         webTestClient.post()
-                .uri("/api/v1/books/add")
+                .uri("/api/v1/books")
                 .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(book)
+                .bodyValue(new BookDto(null, "Book Title", new AuthorDto("1", "Author"), List.of(new GenreDto("1", "Genre"))))
                 .exchange()
                 .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody(BookDto.class)
-                .isEqualTo(book);
+                .value(bookDto -> {
+                    assert bookDto.id().equals("10");
+                    assert bookDto.title().equals("Book Title");
+                    assert bookDto.author().id().equals("1");
+                    assert bookDto.author().fullName().equals("Author");
+                    assert bookDto.genres().get(0).id().equals("1");
+                    assert bookDto.genres().get(0).name().equals("Genre");
+                });
     }
 
     @Test
-    void shouldUpdateBook() {
-        Mockito.when(bookService.update(anyString(), anyString(), anyString(), anySet()))
-                .thenReturn(Mono.just(book));
+    void testUpdateBook() {
+        given(bookService.update("10", "Book Title", "1", Set.of("1")))
+                .willReturn(Mono.just(book));
 
         webTestClient.put()
-                .uri("/api/v1/books/update")
+                .uri("/api/v1/books")
                 .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(book)
+                .bodyValue(new BookDto("10", "Book Title", new AuthorDto("1", "Author"), List.of(new GenreDto("1", "Genre"))))
                 .exchange()
                 .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody(BookDto.class)
-                .isEqualTo(book);
+                .value(bookDto -> {
+                    assert bookDto.id().equals("10");
+                    assert bookDto.title().equals("Book Title");
+                    assert bookDto.author().id().equals("1");
+                    assert bookDto.author().fullName().equals("Author");
+                    assert bookDto.genres().get(0).id().equals("1");
+                    assert bookDto.genres().get(0).name().equals("Genre");
+                });
     }
 
     @Test
-    void shouldDeleteBook() {
-        Mockito.when(bookService.deleteById("10")).thenReturn(Mono.empty());
+    void testDeleteBook() {
+        given(bookService.deleteById("10")).willReturn(Mono.empty());
 
         webTestClient.delete()
-                .uri("/api/v1/books/delete/10")
+                .uri("/api/v1/books/10")
                 .exchange()
                 .expectStatus().isOk()
-                .expectBody(Void.class);
+                .expectBody().isEmpty();
     }
 }

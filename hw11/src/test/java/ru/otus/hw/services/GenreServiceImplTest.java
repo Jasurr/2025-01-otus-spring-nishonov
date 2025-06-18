@@ -5,11 +5,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.springframework.context.annotation.Import;
+import reactor.test.StepVerifier;
 import ru.otus.hw.config.TestMongockConfig;
-import ru.otus.hw.dto.GenreDto;
 import ru.otus.hw.mapper.GenreMapper;
-
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -24,10 +22,14 @@ class GenreServiceImplTest {
     @DisplayName("Find all genres should return non-empty list")
     @Test
     void shouldFindAllGenres() {
-        List<GenreDto> genres = genreService.findAll();
-        assertThat(genres)
-                .isNotNull()
-                .isNotEmpty()
-                .allMatch(genre -> genre.name() != null && !genre.name().isEmpty());
+        StepVerifier.create(genreService.findAll().collectList())
+                .assertNext(genres -> assertThat(genres)
+                        .as("Genres should not be null")
+                        .isNotNull()
+                        .as("Genres should not be empty")
+                        .isNotEmpty()
+                        .allMatch(genre -> genre.name() != null && !genre.name().isEmpty())
+                )
+                .verifyComplete();
     }
 }

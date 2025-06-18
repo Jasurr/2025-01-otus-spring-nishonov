@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import React, {useState, useEffect} from 'react';
+import {Link, useParams} from 'react-router-dom';
 
 const CommentList = () => {
-    const { bookId } = useParams();
+    const {bookId} = useParams();
     const [comments, setComments] = useState([]);
     const [newComment, setNewComment] = useState('');
     const [error, setError] = useState('');
@@ -15,7 +15,10 @@ const CommentList = () => {
             return;
         }
 
-        fetch(`/api/v1/book/comments/${bookId}`)
+        const request = {
+            bookId
+        }
+        fetch(`/api/v1/book/comments?bookId=${bookId}`)
             .then(response => {
                 if (!response.ok) {
                     throw new Error('Failed to fetch comments');
@@ -39,12 +42,14 @@ const CommentList = () => {
             return;
         }
 
-        const formData = new FormData();
-        formData.append('message', newComment);
-
-        fetch(`/api/v1/book/comments/${bookId}/add`, {
+        const comment = {
+            message: newComment,
+            bookId
+        }
+        fetch(`/api/v1/book/comments`, {
             method: 'POST',
-            body: formData
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(comment)
         })
             .then(response => {
                 if (!response.ok) {
@@ -52,7 +57,7 @@ const CommentList = () => {
                         throw new Error(err.message || 'Failed to add comment');
                     });
                 }
-                return fetch(`/api/v1/book/comments/${bookId}`);
+                return fetch(`/api/v1/book/comments?bookId=${bookId}`);
             })
             .then(response => response.json())
             .then(data => {
@@ -70,7 +75,7 @@ const CommentList = () => {
             return;
         }
 
-        fetch(`/api/v1/book/comments/${commentId}/delete`, {
+        fetch(`/api/v1/book/comments/${commentId}`, {
             method: 'DELETE'
         })
             .then(response => {
@@ -94,20 +99,20 @@ const CommentList = () => {
             margin: 0,
             padding: '40px'
         }}>
-            <h2 style={{ textAlign: 'center', color: '#2c3e50', marginBottom: '30px' }}>
+            <h2 style={{textAlign: 'center', color: '#2c3e50', marginBottom: '30px'}}>
                 Comments for Book ID: {bookId || 'Unknown'}
             </h2>
 
             {error && (
-                <div style={{ color: 'red', textAlign: 'center' }}>
+                <div style={{color: 'red', textAlign: 'center'}}>
                     <p>{error}</p>
                 </div>
             )}
 
             {loading ? (
-                <p style={{ textAlign: 'center' }}>Loading...</p>
+                <p style={{textAlign: 'center'}}>Loading...</p>
             ) : (
-                <div style={{ width: '90%', margin: 'auto' }}>
+                <div style={{width: '90%', margin: 'auto'}}>
                     <table style={{
                         borderCollapse: 'collapse',
                         width: '100%',
@@ -122,23 +127,25 @@ const CommentList = () => {
                                 textAlign: 'left',
                                 backgroundColor: '#ecf0f1',
                                 color: '#333'
-                            }}>Comment</th>
+                            }}>Comment
+                            </th>
                             <th style={{
                                 border: '1px solid #ddd',
                                 padding: '12px',
                                 textAlign: 'left',
                                 backgroundColor: '#ecf0f1',
                                 color: '#333'
-                            }}>Actions</th>
+                            }}>Actions
+                            </th>
                         </tr>
                         </thead>
                         <tbody>
                         {comments.map(comment => (
                             <tr key={comment.id}>
-                                <td style={{ border: '1px solid #ddd', padding: '12px' }}>
+                                <td style={{border: '1px solid #ddd', padding: '12px'}}>
                                     {comment.message}
                                 </td>
-                                <td style={{ border: '1px solid #ddd', padding: '12px' }}>
+                                <td style={{border: '1px solid #ddd', padding: '12px'}}>
                                     <Link
                                         to={`/book/comment/edit?commentId=${comment.id}&bookId=${bookId}`}
                                         style={{
@@ -182,20 +189,20 @@ const CommentList = () => {
                 </div>
             )}
 
-            <h3 style={{ textAlign: 'center', color: '#2c3e50', marginBottom: '30px' }}>
+            <h3 style={{textAlign: 'center', color: '#2c3e50', marginBottom: '30px'}}>
                 Add New Comment
             </h3>
             <form onSubmit={handleAddComment}>
                 <textarea
                     name="message"
                     rows="4"
-                    style={{ width: '100%', padding: '10px' }}
+                    style={{width: '100%', padding: '10px'}}
                     placeholder="Enter your comment"
                     value={newComment}
                     onChange={(e) => setNewComment(e.target.value)}
                     required
                 />
-                <div style={{ marginTop: '25px', textAlign: 'center' }}>
+                <div style={{marginTop: '25px', textAlign: 'center'}}>
                     <button
                         type="submit"
                         style={{
@@ -234,7 +241,7 @@ const CommentList = () => {
                 </div>
             </form>
 
-            <div style={{ marginTop: '25px', textAlign: 'center' }}>
+            <div style={{marginTop: '25px', textAlign: 'center'}}>
                 <Link
                     to="/"
                     style={{

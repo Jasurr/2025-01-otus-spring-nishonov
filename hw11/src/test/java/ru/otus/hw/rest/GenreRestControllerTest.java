@@ -2,62 +2,62 @@ package ru.otus.hw.rest;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.reactive.server.WebTestClient;
+import reactor.core.publisher.Flux;
 import ru.otus.hw.dto.GenreDto;
 import ru.otus.hw.services.GenreService;
 
 import java.util.List;
 
 import static org.mockito.BDDMockito.given;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-
-@WebMvcTest(GenreRestController.class)
+@WebFluxTest(GenreRestController.class)
 class GenreRestControllerTest {
 
     @Autowired
-    private MockMvc mockMvc;
+    private WebTestClient webTestClient;
 
     @MockBean
     private GenreService genreService;
 
     @Test
-    void testGetAllGenres() throws Exception {
-        // Arrange
+    void testGetAllGenres() {
         List<GenreDto> genres = List.of(
-                new GenreDto(1L, "Fiction"),
-                new GenreDto(2L, "Non-Fiction")
+                new GenreDto("1", "Fiction"),
+                new GenreDto("2", "Non-Fiction")
         );
-        given(genreService.findAll()).willReturn(genres);
+        given(genreService.findAll()).willReturn(Flux.fromIterable(genres));
 
-        // Act & Assert
-        mockMvc.perform(get("/api/v1/genres")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.length()").value(2))
-                .andExpect(jsonPath("$[0].id").value(1))
-                .andExpect(jsonPath("$[0].name").value("Fiction"))
-                .andExpect(jsonPath("$[1].id").value(2))
-                .andExpect(jsonPath("$[1].name").value("Non-Fiction"));
+        webTestClient.get()
+                .uri("/api/v1/genres")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBodyList(GenreDto.class)
+                .hasSize(2)
+                .value(list -> {
+                    assert list.get(0).id().equals("1");
+                    assert list.get(0).name().equals("Fiction");
+                    assert list.get(1).id().equals("2");
+                    assert list.get(1).name().equals("Non-Fiction");
+                });
     }
 
     @Test
-    void testGetAllGenresEmptyList() throws Exception {
-        // Arrange
-        given(genreService.findAll()).willReturn(List.of());
+    void testGetAllGenresEmptyList() {
+        given(genreService.findAll()).willReturn(Flux.empty());
 
-        // Act & Assert
-        mockMvc.perform(get("/api/v1/genres")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.length()").value(0));
+        webTestClient.get()
+                .uri("/api/v1/genres")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBodyList(GenreDto.class)
+                .hasSize(0);
     }
 }

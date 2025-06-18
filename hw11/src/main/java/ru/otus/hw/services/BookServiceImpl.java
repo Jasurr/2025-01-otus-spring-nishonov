@@ -145,13 +145,7 @@ public class BookServiceImpl implements BookService {
 
     private Mono<Void> updateCommentsWithBook(String bookId, BookDto updatedBookDto) {
         Book updatedBook = bookMapper.toEntity(updatedBookDto);
-
-        return commentRepository.findByBookId(bookId) // Flux<Comment>
-                .flatMap(comment -> {
-                    comment.setBook(updatedBook);
-                    return commentRepository.save(comment); // Mono<Comment>
-                })
-                .then();
+        return commentRepository.updateCommentsByBookId(bookId, updatedBook);
     }
 
 }

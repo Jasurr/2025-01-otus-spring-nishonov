@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import React, {useState, useEffect} from 'react';
+import {Link, useLocation, useNavigate} from 'react-router-dom';
 
 const CommentForm = () => {
     const navigate = useNavigate();
@@ -19,7 +19,7 @@ const CommentForm = () => {
         }
 
         // Assume an endpoint to fetch comment by ID
-        fetch(`/api/v1/book/comments/one/${commentId}`)
+        fetch(`/api/v1/book/comments/${commentId}`)
             .then(response => {
                 if (!response.ok) {
                     throw new Error('Failed to fetch comment');
@@ -43,12 +43,15 @@ const CommentForm = () => {
             return;
         }
 
-        const formData = new FormData();
-        formData.append('message', message);
+        const updatedComment = {
+            id: commentId,
+            message: message
+        }
 
-        fetch(`/api/v1/book/comments/${commentId}/update`, {
+        fetch(`/api/v1/book/comments`, {
             method: 'PUT',
-            body: formData
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(updatedComment)
         })
             .then(response => {
                 if (!response.ok) {
@@ -70,30 +73,30 @@ const CommentForm = () => {
             margin: 0,
             padding: '40px'
         }}>
-            <h2 style={{ textAlign: 'center', color: '#2c3e50', marginBottom: '30px' }}>
+            <h2 style={{textAlign: 'center', color: '#2c3e50', marginBottom: '30px'}}>
                 Edit Comment
             </h2>
 
             {error && (
-                <div style={{ color: 'red', textAlign: 'center' }}>
+                <div style={{color: 'red', textAlign: 'center'}}>
                     <p>{error}</p>
                 </div>
             )}
 
             {loading ? (
-                <p style={{ textAlign: 'center' }}>Loading...</p>
+                <p style={{textAlign: 'center'}}>Loading...</p>
             ) : (
                 <form onSubmit={handleSubmit}>
                     <textarea
                         name="message"
                         rows="4"
-                        style={{ width: '100%', padding: '10px' }}
+                        style={{width: '100%', padding: '10px'}}
                         placeholder="Enter your comment"
                         value={message}
                         onChange={(e) => setMessage(e.target.value)}
                         required
                     />
-                    <div style={{ marginTop: '25px', textAlign: 'center' }}>
+                    <div style={{marginTop: '25px', textAlign: 'center'}}>
                         <button
                             type="submit"
                             style={{

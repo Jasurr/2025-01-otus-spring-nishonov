@@ -95,7 +95,7 @@ const BookForm = () => {
             genres: genreIds
         };
 
-        const url = bookId ? `/api/v1/books/update` : '/api/v1/books/add';
+        const url = '/api/v1/books';
         const method = bookId ? 'PUT' : 'POST';
 
         try {

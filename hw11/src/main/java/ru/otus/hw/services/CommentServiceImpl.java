@@ -46,56 +46,45 @@ public class CommentServiceImpl implements CommentService {
     @Transactional(readOnly = true)
     @Override
     public Flux<CommentDto> findByBookId(String bookId) {
-        return Flux.defer(() -> {
-            if (bookId == null || bookId.trim().isEmpty()) {
-                return Mono.error(new IllegalArgumentException(ERROR_INVALID_ID));
-            }
-            return commentRepository.findByBookId(bookId)
-                    .switchIfEmpty(Mono.error(new EntityNotFoundException(ERROR_BOOK_NOT_FOUND.formatted(bookId))))
-                    .map(commentMapper::toDto);
-
-        });
+        return commentRepository.findByBookId(bookId)
+                .switchIfEmpty(Mono.error(new EntityNotFoundException(ERROR_COMMENT_NOT_FOUND.formatted(bookId))))
+                .map(commentMapper::toDto);
     }
 
     @Override
     public Mono<CommentDto> insert(String message, String bookId) {
-        return Mono.defer(() -> {
-            if (message == null || message.trim().isEmpty()) {
-                return Mono.error(new IllegalArgumentException(ERROR_INVALID_MESSAGE));
-            }
-            if (bookId == null || bookId.trim().isEmpty()) {
-                return Mono.error(new IllegalArgumentException(ERROR_INVALID_ID));
-            }
-
-            return findBook(bookId)
-                    .flatMap(book -> {
-                        Comment comment = new Comment();
-                        comment.setMessage(message);
-                        comment.setBook(book);
-                        return commentRepository.save(comment);
-                    })
-                    .map(commentMapper::toDto);
-        });
+        if (message == null || message.trim().isEmpty()) {
+            return Mono.error(new IllegalArgumentException(ERROR_INVALID_MESSAGE));
+        }
+        if (bookId == null || bookId.trim().isEmpty()) {
+            return Mono.error(new IllegalArgumentException(ERROR_INVALID_ID));
+        }
+        return findBook(bookId)
+                .flatMap(book -> {
+                    var comment = new Comment();
+                    comment.setMessage(message);
+                    comment.setBook(book);
+                    return commentRepository.save(comment);
+                })
+                .map(commentMapper::toDto);
     }
 
     @Transactional
     @Override
     public Mono<CommentDto> update(String id, String message) {
-        return Mono.defer(() -> {
-            if (message == null || message.trim().isEmpty()) {
-                return Mono.error(new IllegalArgumentException(ERROR_INVALID_MESSAGE));
-            }
-            if (id == null || id.trim().isEmpty()) {
-                return Mono.error(new IllegalArgumentException(ERROR_INVALID_ID));
-            }
-            return commentRepository.findById(id)
-                    .switchIfEmpty(Mono.error(new EntityNotFoundException(ERROR_COMMENT_NOT_FOUND.formatted(id))))
-                    .flatMap(comment -> {
-                        comment.setMessage(message);
-                        return commentRepository.save(comment);
-                    })
-                    .map(commentMapper::toDto);
-        });
+        if (message == null || message.trim().isEmpty()) {
+            return Mono.error(new IllegalArgumentException(ERROR_INVALID_MESSAGE));
+        }
+        if (id == null || id.trim().isEmpty()) {
+            return Mono.error(new IllegalArgumentException(ERROR_INVALID_ID));
+        }
+        return commentRepository.findById(id)
+                .switchIfEmpty(Mono.error(new EntityNotFoundException(ERROR_COMMENT_NOT_FOUND.formatted(id))))
+                .flatMap(comment -> {
+                    comment.setMessage(message);
+                    return commentRepository.save(comment);
+                })
+                .map(commentMapper::toDto);
     }
 
     @Transactional

@@ -6,24 +6,23 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.test.annotation.DirtiesContext;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 import ru.otus.hw.config.TestMongockConfig;
 import ru.otus.hw.models.Author;
 import ru.otus.hw.models.Book;
 import ru.otus.hw.models.Genre;
 
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataMongoTest
 @Import(TestMongockConfig.class)
-@DisplayName("Book Repository Tests for MongoDB")
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@DisplayName("Book Repository Tests for MongoDB (Reactive)")
 class BookRepositoryTest {
 
     private static final String TEST_BOOK_TITLE = "Sample Book";
@@ -35,17 +34,18 @@ class BookRepositoryTest {
     private BookRepository bookRepository;
 
     @Autowired
-    private MongoTemplate mongoTemplate;
+    private ReactiveMongoTemplate reactiveMongoTemplate;
 
     private Author testAuthor;
     private Genre testGenre;
 
     @BeforeEach
     void setUp() {
-        // Clean up any existing test data
-        mongoTemplate.remove(Query.query(Criteria.where("title").regex("^" + TEST_BOOK_TITLE)), Book.class);
+        reactiveMongoTemplate.remove(Query.query(Criteria.where("title").regex("^" + TEST_BOOK_TITLE)), Book.class)
+                .as(StepVerifier::create)
+                .expectNextMatches(result -> result.getDeletedCount() >= 0) // Accept any delete count
+                .verifyComplete();
 
-        // Fetch reference data once
         testAuthor = findAuthorByName(TEST_AUTHOR_NAME);
         testGenre = findGenreByName(TEST_GENRE_NAME);
     }
@@ -57,62 +57,71 @@ class BookRepositoryTest {
         Book book = createTestBook(TEST_BOOK_TITLE);
 
         // When
-        Book savedBook = bookRepository.save(book);
+        Mono<Book> savedBookMono = bookRepository.save(book);
 
         // Then
-        assertBookIsSavedCorrectly(savedBook, TEST_BOOK_TITLE);
-        verifyBookExistsInDatabase(savedBook);
+        StepVerifier.create(savedBookMono)
+                .assertNext(savedBook -> assertBookIsSavedCorrectly(savedBook, TEST_BOOK_TITLE))
+                .verifyComplete();
+
+        // Verify book exists in database
+        verifyBookExistsInDatabase(book);
     }
 
     @Test
     @DisplayName("Should find a book by ID")
     void shouldFindById() {
-        // Given - use MongoTemplate to set up test data
         Book testBook = createTestBook(TEST_BOOK_TITLE);
-        Book savedBook = mongoTemplate.save(testBook);
-
-        // When - test the repository method
-        Optional<Book> foundBook = bookRepository.findById(savedBook.getId());
-
-        // Then - verify using assertions
-        assertThat(foundBook)
-                .isPresent()
-                .get()
-                .satisfies(book -> assertBooksAreEqual(book, savedBook));
+        Book savedBook = reactiveMongoTemplate.save(testBook).block();
+        StepVerifier.create(bookRepository.findById(savedBook.getId()))
+                .assertNext(foundBook -> assertBooksAreEqual(foundBook, savedBook))
+                .verifyComplete();
     }
 
     @Test
     @DisplayName("Should find all books with complete data")
     void shouldFindAll() {
-        // Given - use MongoTemplate to set up test data
-        Book book1 = mongoTemplate.save(createTestBook(TEST_BOOK_TITLE));
-        Book book2 = mongoTemplate.save(createTestBook(TEST_BOOK_TITLE_2));
+        // Given - use ReactiveMongoTemplate to set up test data
+        Book book1 = createTestBook(TEST_BOOK_TITLE);
+        Book book2 = createTestBook(TEST_BOOK_TITLE_2);
+
+        reactiveMongoTemplate.save(book1)
+                .then(reactiveMongoTemplate.save(book2))
+                .as(StepVerifier::create)
+                .expectNextCount(1)
+                .verifyComplete();
 
         // When - test the repository method
-        List<Book> allBooks = bookRepository.findAll();
-
-        // Then
-        assertThat(allBooks)
-                .hasSizeGreaterThanOrEqualTo(2)
-                .allSatisfy(this::assertBookHasCompleteData)
-                .extracting(Book::getTitle)
-                .contains(TEST_BOOK_TITLE, TEST_BOOK_TITLE_2);
+        StepVerifier.create(bookRepository.findAll().collectList())
+                .assertNext(allBooks -> {
+                    assertThat(allBooks)
+                            .hasSizeGreaterThanOrEqualTo(2)
+                            .allSatisfy(this::assertBookHasCompleteData)
+                            .extracting(Book::getTitle)
+                            .contains(TEST_BOOK_TITLE, TEST_BOOK_TITLE_2);
+                })
+                .verifyComplete();
     }
 
     @Test
     @DisplayName("Should delete a book by ID")
     void shouldDeleteById() {
-        // Given - use MongoTemplate to set up test data
+        // Given - use ReactiveMongoTemplate to set up test data
         Book testBook = createTestBook(TEST_BOOK_TITLE);
-        Book savedBook = mongoTemplate.save(testBook);
-        String bookId = savedBook.getId();
+        Book savedBook = reactiveMongoTemplate.save(testBook).block();
+        assertThat(savedBook.getId()).isNotNull();
+        System.out.println("Deleting book with ID: " + savedBook.getId());
 
-        // When - test the repository method
-        bookRepository.deleteById(bookId);
+        // When - test the repository delete method
+        StepVerifier.create(bookRepository.deleteById(savedBook.getId()))
+                .verifyComplete();
 
-        // Then - verify using MongoTemplate
-        Book deletedBook = mongoTemplate.findById(bookId, Book.class);
-        assertThat(deletedBook).isNull();
+        // Then - verify the book no longer exists
+        Mono<Book> notExistsBook = reactiveMongoTemplate.findOne(
+                Query.query(Criteria.where("_id").is(savedBook.getId())), Book.class);
+        StepVerifier.create(notExistsBook)
+                .expectNextCount(0)
+                .verifyComplete();
     }
 
     @Test
@@ -122,17 +131,21 @@ class BookRepositoryTest {
         String nonExistentId = "507f1f77bcf86cd799439011";
 
         // When & Then - test repository method with non-existent ID
-        assertThat(bookRepository.findById(nonExistentId)).isEmpty();
+        StepVerifier.create(bookRepository.findById(nonExistentId))
+                .expectNextCount(0)
+                .verifyComplete();
 
-        // Verify using MongoTemplate as well
-        Book foundBook = mongoTemplate.findById(nonExistentId, Book.class);
-        assertThat(foundBook).isNull();
+        // Verify using ReactiveMongoTemplate
+        StepVerifier.create(reactiveMongoTemplate.findById(nonExistentId, Book.class))
+                .expectNextCount(0)
+                .verifyComplete();
     }
 
     // Helper methods
     private Author findAuthorByName(String name) {
-        Author author = mongoTemplate.findOne(
+        Mono<Author> authorMono = reactiveMongoTemplate.findOne(
                 Query.query(Criteria.where("fullName").is(name)), Author.class);
+        Author author = authorMono.block(); // Blocking in tests is acceptable
         assertThat(author)
                 .as("Author with name '%s' should exist in test data", name)
                 .isNotNull();
@@ -140,8 +153,9 @@ class BookRepositoryTest {
     }
 
     private Genre findGenreByName(String name) {
-        Genre genre = mongoTemplate.findOne(
+        Mono<Genre> genreMono = reactiveMongoTemplate.findOne(
                 Query.query(Criteria.where("name").is(name)), Genre.class);
+        Genre genre = genreMono.block(); // Blocking in tests is acceptable
         assertThat(genre)
                 .as("Genre with name '%s' should exist in test data", name)
                 .isNotNull();
@@ -171,12 +185,11 @@ class BookRepositoryTest {
                 .containsExactly(testGenre);
     }
 
-    private void verifyBookExistsInDatabase(Book savedBook) {
-        Book foundBook = mongoTemplate.findById(savedBook.getId(), Book.class);
-        assertThat(foundBook)
-                .as("Book should exist in database after saving")
-                .isNotNull();
-        assertBooksAreEqual(foundBook, savedBook);
+    private void verifyBookExistsInDatabase(Book book) {
+        StepVerifier.create(reactiveMongoTemplate.findOne(
+                        Query.query(Criteria.where("title").is(book.getTitle())), Book.class))
+                .assertNext(foundBook -> assertBooksAreEqual(foundBook, book))
+                .verifyComplete();
     }
 
     private void assertBooksAreEqual(Book actual, Book expected) {
