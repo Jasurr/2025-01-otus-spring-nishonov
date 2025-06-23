@@ -58,6 +58,7 @@ public class InitialDataMigration {
         var books = booksDTO.stream()
                 .map(bookDTO -> {
                     Book book = new Book();
+                    book.setId(bookDTO.id());
                     book.setTitle(bookDTO.title());
                     book.setAuthor(new Author(bookDTO.author().id(), bookDTO.author().fullName()));
                    book.setGenres(
