@@ -15,7 +15,10 @@ const CommentList = () => {
             return;
         }
 
-        fetch(`/api/v1/book/comments/${bookId}`)
+        const request = {
+            bookId
+        }
+        fetch(`/api/v1/book/comments?bookId=${bookId}`)
             .then(response => {
                 if (!response.ok) {
                     throw new Error('Failed to fetch comments');
@@ -39,12 +42,14 @@ const CommentList = () => {
             return;
         }
 
-        const formData = new FormData();
-        formData.append('message', newComment);
-
-        fetch(`/api/v1/book/comments/${bookId}`, {
+        const comment = {
+            message: newComment,
+            bookId
+        }
+        fetch(`/api/v1/book/comments`, {
             method: 'POST',
-            body: formData
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(comment)
         })
             .then(response => {
                 if (!response.ok) {
@@ -52,7 +57,7 @@ const CommentList = () => {
                         throw new Error(err.message || 'Failed to add comment');
                     });
                 }
-                return fetch(`/api/v1/book/comments/${bookId}`);
+                return fetch(`/api/v1/book/comments?bookId=${bookId}`);
             })
             .then(response => response.json())
             .then(data => {

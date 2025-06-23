@@ -19,7 +19,7 @@ const CommentForm = () => {
         }
 
         // Assume an endpoint to fetch comment by ID
-        fetch(`/api/v1/book/comments/one/${commentId}`)
+        fetch(`/api/v1/book/comments/${commentId}`)
             .then(response => {
                 if (!response.ok) {
                     throw new Error('Failed to fetch comment');
@@ -43,12 +43,15 @@ const CommentForm = () => {
             return;
         }
 
-        const formData = new FormData();
-        formData.append('message', message);
+        const updatedComment = {
+            id: commentId,
+            message: message
+        }
 
-        fetch(`/api/v1/book/comments/${commentId}`, {
+        fetch(`/api/v1/book/comments`, {
             method: 'PUT',
-            body: formData
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(updatedComment)
         })
             .then(response => {
                 if (!response.ok) {
