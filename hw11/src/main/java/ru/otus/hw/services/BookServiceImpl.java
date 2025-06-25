@@ -88,17 +88,14 @@ public class BookServiceImpl implements BookService {
                 .then(bookRepository.deleteById(id));
     }
 
-    private Mono<BookDto> save(String id, String title, String authorId, Set<String> genresIds) {
+    private Mono<BookDto> save(
+            String id,
+            String title,
+            String authorId,
+            Set<String> genresIds) {
         validateInput(title, authorId, genresIds);
-
         Mono<Author> authorMono = findAuthor(authorId);
-        Mono<List<Genre>> genresListMono = findGenres(genresIds).collectList()
-                .flatMap(genres -> {
-                    if (genres.size() != genresIds.size()) {
-                        return Mono.error(new EntityNotFoundException(ERROR_GENRES_NOT_FOUND.formatted(genresIds)));
-                    }
-                    return Mono.just(genres);
-                });
+        Mono<List<Genre>> genresListMono = findGenres(genresIds);
 
         Mono<Book> bookMono = (id == null)
                 ? Mono.just(new Book())
@@ -110,11 +107,9 @@ public class BookServiceImpl implements BookService {
                     Book book = tuple.getT1();
                     Author author = tuple.getT2();
                     List<Genre> genres = tuple.getT3();
-
                     book.setTitle(title);
                     book.setAuthor(author);
                     book.setGenres(genres);
-
                     return bookRepository.save(book);
                 })
                 .map(bookMapper::toDto); // if toDto returns Mono<BookDto>
@@ -126,9 +121,16 @@ public class BookServiceImpl implements BookService {
                 .switchIfEmpty(Mono.error(new EntityNotFoundException(ERROR_AUTHOR_NOT_FOUND.formatted(authorId))));
     }
 
-    private Flux<Genre> findGenres(Set<String> genresIds) {
+    private Mono<List<Genre>> findGenres(Set<String> genresIds) {
         return genreRepository.findAllByIdIn(genresIds)
-                .switchIfEmpty(Mono.error(new EntityNotFoundException(ERROR_GENRES_NOT_FOUND.formatted(genresIds))));
+                .switchIfEmpty(Mono.error(new EntityNotFoundException(ERROR_GENRES_NOT_FOUND.formatted(genresIds))))
+                .collectList()
+                .flatMap(genres -> {
+                    if (genres.size() != genresIds.size()) {
+                        return Mono.error(new EntityNotFoundException(ERROR_GENRES_NOT_FOUND.formatted(genresIds)));
+                    }
+                    return Mono.just(genres);
+                });
     }
 
     private void validateInput(String title, String authorId, Set<String> genresIds) {

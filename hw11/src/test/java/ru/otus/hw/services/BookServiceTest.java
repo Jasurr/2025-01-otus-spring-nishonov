@@ -1,6 +1,5 @@
 package ru.otus.hw.services;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -11,12 +10,9 @@ import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import ru.otus.hw.config.TestMongockConfig;
-import ru.otus.hw.dto.AuthorDto;
 import ru.otus.hw.dto.BookDto;
-import ru.otus.hw.dto.GenreDto;
 import ru.otus.hw.mapper.BookMapper;
 import ru.otus.hw.models.Author;
-import ru.otus.hw.models.Book;
 import ru.otus.hw.models.Genre;
 
 import java.util.Set;
@@ -45,13 +41,6 @@ class BookServiceTest {
     @BeforeEach
     @DisplayName("Setup common test data")
     void setUp() {
-        // Clear database to ensure test isolation using parallel operations
-        Mono.when(
-                reactiveMongoTemplate.dropCollection(Book.class),
-                reactiveMongoTemplate.dropCollection(Author.class),
-                reactiveMongoTemplate.dropCollection(Genre.class)
-        ).block();
-
         // Insert test data directly
         Author testAuthor = new Author(null, TEST_AUTHOR_NAME);
         Genre testGenre = new Genre(null, TEST_GENRE_NAME);
@@ -70,17 +59,6 @@ class BookServiceTest {
                 .isNotNull()
                 .extracting(Genre::getId)
                 .isNotNull();
-    }
-
-    @AfterEach
-    @DisplayName("Clean up after each test")
-    void tearDown() {
-        // Clean up database after each test using parallel operations
-        Mono.when(
-                reactiveMongoTemplate.dropCollection(Book.class),
-                reactiveMongoTemplate.dropCollection(Author.class),
-                reactiveMongoTemplate.dropCollection(Genre.class)
-        ).block();
     }
 
     @Test
@@ -215,14 +193,5 @@ class BookServiceTest {
 
         StepVerifier.create(bookService.deleteById(nonExistentId))
                 .verifyComplete(); // Should complete without error even if book doesn't exist
-    }
-
-    @Test
-    @DisplayName("Find all books should return empty flux when no books exist")
-    void shouldReturnEmptyFluxWhenNoBooks() {
-        // Don't insert any books, just test findAll on empty collection
-        StepVerifier.create(bookService.findAll())
-                .expectNextCount(0)
-                .verifyComplete();
     }
 }

@@ -7,9 +7,11 @@ import com.github.cloudyrock.mongock.ChangeSet;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import ru.otus.hw.dto.AuthorDto;
 import ru.otus.hw.dto.BookDto;
+import ru.otus.hw.dto.CommentRequest;
 import ru.otus.hw.dto.GenreDto;
 import ru.otus.hw.models.Author;
 import ru.otus.hw.models.Book;
+import ru.otus.hw.models.Comment;
 import ru.otus.hw.models.Genre;
 
 import java.io.IOException;
@@ -72,6 +74,26 @@ public class InitialDataMigration {
 
         books.forEach(mongoTemplate::save);
         LOGGER.info("✅ Books imported successfully: " + books.size());
+    }
+
+    @ChangeSet(order = "004", id = "initComments", author = "Jasur")
+    public void initComments(MongoTemplate mongoTemplate) throws IOException {
+        // Load books from JSON and save to MongoDB
+        List<CommentRequest> commentList = readJson("data/comments.json", new TypeReference<>() {
+        });
+        var comments = commentList.stream()
+                .map(commentRequest -> {
+                    Comment comment = new Comment();
+                    Book book = new Book();
+                    book.setId(commentRequest.bookId());
+                    comment.setBook(book);
+                    comment.setMessage(commentRequest.message());
+                    return comment;
+                })
+                .toList();
+
+        comments.forEach(mongoTemplate::save);
+        LOGGER.info("✅ Comments imported successfully: " + comments.size());
     }
 
     /**

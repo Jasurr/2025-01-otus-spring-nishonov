@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import ru.otus.hw.dto.AuthorDto;
@@ -15,6 +16,7 @@ import java.util.List;
 import static org.mockito.BDDMockito.given;
 
 @WebFluxTest(AuthorRestController.class)
+@ContextConfiguration(classes = AuthorRestController.class) // Explicitly limit context to the controller
 class AuthorRestControllerTest {
 
     @Autowired

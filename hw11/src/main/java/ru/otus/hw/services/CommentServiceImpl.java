@@ -90,12 +90,10 @@ public class CommentServiceImpl implements CommentService {
     @Transactional
     @Override
     public Mono<Void> deleteById(String id) {
-        return Mono.defer(() -> {
-            if (id == null || id.trim().isEmpty()) {
-                return Mono.error(new IllegalArgumentException(ERROR_INVALID_ID));
-            }
-            return commentRepository.deleteById(id);
-        });
+        if (id == null || id.trim().isEmpty()) {
+            return Mono.error(new IllegalArgumentException(ERROR_INVALID_ID));
+        }
+        return commentRepository.deleteById(id);
     }
 
     private Mono<Book> findBook(String bookId) {

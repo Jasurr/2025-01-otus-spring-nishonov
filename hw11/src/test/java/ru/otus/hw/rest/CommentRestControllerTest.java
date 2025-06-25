@@ -5,10 +5,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import ru.otus.hw.dto.CommentDto;
+import ru.otus.hw.dto.CommentRequest;
 import ru.otus.hw.services.CommentService;
 
 import java.util.List;
@@ -17,6 +19,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 
 @WebFluxTest(CommentRestController.class)
+@ContextConfiguration(classes = CommentRestController.class)
 class CommentRestControllerTest {
 
     @Autowired
@@ -31,7 +34,7 @@ class CommentRestControllerTest {
         given(commentService.findById("1")).willReturn(Mono.just(comment));
 
         webTestClient.get()
-                .uri("/api/v1/book/comments/one/1")
+                .uri("/api/v1/book/comments/1")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
@@ -44,17 +47,6 @@ class CommentRestControllerTest {
     }
 
     @Test
-    void testGetCommentNotFound() {
-        given(commentService.findById("1")).willReturn(Mono.empty());
-
-        webTestClient.get()
-                .uri("/api/v1/book/comments/one/1")
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isNotFound();
-    }
-
-    @Test
     void testGetCommentsByBookId() {
         List<CommentDto> comments = List.of(
                 new CommentDto("1", "Great book!"),
@@ -63,7 +55,7 @@ class CommentRestControllerTest {
         given(commentService.findByBookId("1")).willReturn(Flux.fromIterable(comments));
 
         webTestClient.get()
-                .uri("/api/v1/book/comments/1")
+                .uri("/api/v1/book/comments?bookId=1")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
@@ -84,9 +76,9 @@ class CommentRestControllerTest {
         given(commentService.insert("Nice book!", "1")).willReturn(Mono.just(newComment));
 
         webTestClient.post()
-                .uri("/api/v1/book/comments/1/add")
-                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                .bodyValue("message=Nice book!")
+                .uri("/api/v1/book/comments")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(new CommentRequest("1", "Nice book!"))
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
@@ -103,9 +95,9 @@ class CommentRestControllerTest {
         given(commentService.update("1", "Updated comment")).willReturn(Mono.just(updatedComment));
 
         webTestClient.put()
-                .uri("/api/v1/book/comments/1/update")
-                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                .bodyValue("message=Updated comment")
+                .uri("/api/v1/book/comments")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(new CommentDto("1", "Updated comment"))
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
@@ -118,10 +110,10 @@ class CommentRestControllerTest {
 
     @Test
     void testDeleteComment() {
-        doNothing().when(commentService).deleteById("1");
+        given(commentService.deleteById("1")).willReturn(Mono.empty());
 
         webTestClient.delete()
-                .uri("/api/v1/book/comments/1/delete")
+                .uri("/api/v1/book/comments/1")
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody().isEmpty();

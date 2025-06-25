@@ -1,43 +1,67 @@
 [
   {
+    "id": "6849845c9934676eff037a9c",
     "title": "Sample Book",
-    "author": {"id": "1", "fullName": "Author 1"},
+    "author": {
+      "id": "684983af9934676eff037a6e",
+      "fullName": "Author 1"
+    },
     "genres": [
       {
-        "id": "1",
+        "id": "684983d09934676eff037a74",
         "name": "Genre 1"
       },
-        {
-            "id": "2",
-            "name": "Genre 2"
-        }
-    ]
-  },
-  {
-    "title": "Another Book",
-    "author": {"id": "2", "fullName": "Author 2"},
-    "genres": [
       {
-        "id": "3",
-        "name": "Genre 3"
+        "id": "684983d09934676eff037a75",
+        "name": "Genre 2"
       },
       {
-        "id": "4",
-        "name": "Genre 4"
+        "id": "684983d09934676eff037a76",
+        "name": "Genre 3"
       }
     ]
   },
   {
-    "title": "Third Book",
-    "author": {"id": "3", "fullName": "Author 3"},
+    "id": "6849845c9934676eff037a9d",
+    "title": "Another Book",
+    "author": {
+      "id": "684983b69934676eff037a70",
+      "fullName": "Author 2"
+    },
     "genres": [
       {
-        "id": "5",
+        "id": "684983d09934676eff037a76",
+        "name": "Genre 3"
+      },
+      {
+        "id": "684983d09934676eff037a77",
+        "name": "Genre 4"
+      },
+      {
+        "id": "684983d09934676eff037a78",
+        "name": "Genre 5"
+      }
+    ]
+  },
+  {
+    "id": "6849845c9934676eff037a9e",
+    "title": "Third Book",
+    "author": {
+      "id": "684983c49934676eff037a71",
+      "fullName": "Author 3"
+    },
+    "genres": [
+      {
+        "id": "684983d09934676eff037a78",
         "name": "Genre 5"
       },
       {
-        "id": "6",
+        "id": "684983d09934676eff037a79",
         "name": "Genre 6"
+      },
+      {
+        "id": "684983d09934676eff037a74",
+        "name": "Genre 1"
       }
     ]
   }
