@@ -9,7 +9,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
-import ru.otus.hw.config.TestMongockConfig;
 import ru.otus.hw.dto.BookDto;
 import ru.otus.hw.mapper.BookMapper;
 import ru.otus.hw.models.Author;
@@ -20,7 +19,7 @@ import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataMongoTest
-@Import({TestMongockConfig.class, BookServiceImpl.class, BookMapper.class})
+@Import({BookServiceImpl.class, BookMapper.class})
 @DisplayName("Book Service Tests for MongoDB")
 class BookServiceTest {
 

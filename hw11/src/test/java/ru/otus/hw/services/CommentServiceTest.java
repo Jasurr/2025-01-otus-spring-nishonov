@@ -11,7 +11,6 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
-import ru.otus.hw.config.TestMongockConfig;
 import ru.otus.hw.dto.CommentDto;
 import ru.otus.hw.mapper.CommentMapper;
 import ru.otus.hw.models.Book;
@@ -21,7 +20,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataMongoTest
-@Import({CommentServiceImpl.class, TestMongockConfig.class, CommentMapper.class})
+@Import({CommentServiceImpl.class, CommentMapper.class})
 @DisplayName("Tests for CommentService")
 class CommentServiceTest {
 

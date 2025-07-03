@@ -6,13 +6,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.springframework.context.annotation.Import;
 import reactor.test.StepVerifier;
-import ru.otus.hw.config.TestMongockConfig;
 import ru.otus.hw.mapper.AuthorMapper;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataMongoTest
-@Import({TestMongockConfig.class, AuthorServiceImpl.class, AuthorMapper.class})
+@Import({AuthorServiceImpl.class, AuthorMapper.class})
 @DisplayName("Author Service Tests for MongoDB")
 class AuthorServiceImplTest {
 

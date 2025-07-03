@@ -5,13 +5,11 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
-import ru.otus.hw.config.TestMongockConfig;
 import ru.otus.hw.models.Author;
 import ru.otus.hw.models.Book;
 import ru.otus.hw.models.Genre;
@@ -21,7 +19,6 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataMongoTest
-@Import(TestMongockConfig.class)
 @DisplayName("Book Repository Tests for MongoDB (Reactive)")
 class BookRepositoryTest {
 

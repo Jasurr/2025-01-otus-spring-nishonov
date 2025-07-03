@@ -51,26 +51,6 @@
             <version>${jackson.databind.version}</version>
         </dependency>
 
-        <!-- Spring Boot Starter for MongoDB -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-mongodb</artifactId>
-        </dependency>
-
-        <!-- Mongock Core -->
-        <dependency>
-            <groupId>io.mongock</groupId>
-            <artifactId>mongock-springboot</artifactId>
-            <version>${mongock.version}</version>
-        </dependency>
-
-        <!-- Mongock Driver for Spring Data MongoDB v4 -->
-        <dependency>
-            <groupId>io.mongock</groupId>
-            <artifactId>mongodb-springdata-v4-driver</artifactId>
-            <version>${mongock.version}</version>
-        </dependency>
-
         <dependency>
             <groupId>de.flapdoodle.embed</groupId>
             <artifactId>de.flapdoodle.embed.mongo</artifactId>
