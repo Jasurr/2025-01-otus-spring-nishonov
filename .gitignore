@@ -5,3 +5,5 @@
 *.class
 *.mvn
 target/
+/hw10/node_modules
+/hw11/node_modules
