@@ -10,7 +10,10 @@ export default class BookList extends React.Component {
     componentDidMount() {
         fetch('/api/v1/books')
             .then(response => response.json())
-            .then(books => this.setState({books}));
+            .then(books => this.setState({books: books ? books : []}))
+            .catch(error => {
+                console.error('Error fetching books:', error);
+            });
     }
 
     deleteBookById(bookId) {
@@ -67,7 +70,8 @@ export default class BookList extends React.Component {
                                         ))}
                                     </td>
                                     <td className="action-buttons">
-                                        <Link to={`/book/edit-book/${book.id}`} className="button button-edit">Edit</Link>
+                                        <Link to={`/book/edit-book/${book.id}`}
+                                              className="button button-edit">Edit</Link>
                                         <a href="#" className="button button-delete"
                                            onClick={() => this.deleteBookById(book.id)}>
                                             Delete</a>

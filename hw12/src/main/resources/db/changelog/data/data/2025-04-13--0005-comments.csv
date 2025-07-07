@@ -1,16 +1,16 @@
-message,book_id
-"This book was absolutely fascinating!",1
-"I highly recommend reading Book 1",1
-"The author's style is brilliant",1
-"Learned so much from Book 1",1
-"I’ll definitely reread this book",1
-"Book 2’s story is so captivating",2
-"Everyone should read this book",2
-"The plot of Book 2 is amazing",2
-"The author’s creativity is impressive",2
-"Loved every page of Book 2",2
-"Book 3’s ending was unexpected",3
-"This book really made me think",3
-"The characters in Book 3 are great",3
-"Finished this book in one sitting",3
-"I’d recommend Book 3 to friends",3
+message;book_id
+"This book was absolutely fascinating!";1
+"I highly recommend reading Book 1";1
+"The author's style is brilliant";1
+"Learned so much from Book 1";1
+"I’ll definitely reread this book";1
+"Book 2’s story is so captivating";2
+"Everyone should read this book";2
+"The plot of Book 2 is amazing";2
+"The author’s creativity is impressive";2
+"Loved every page of Book 2";2
+"Book 3’s ending was unexpected";3
+"This book really made me think";3
+"The characters in Book 3 are great";3
+"Finished this book in one sitting";3
+"I’d recommend Book 3 to friends";3

@@ -1,9 +1,13 @@
 spring:
   datasource:
     url: jdbc:h2:mem:maindb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
   h2:
     console:
       enabled: true
+      path: /h2-console
   liquibase:
     enabled: true
     change-log: classpath:db/changelog/db.changelog-master.yml
@@ -21,8 +25,10 @@ spring:
         order_updates: true
         format_sql: true
         use_sql_comments: true
-
 logging:
   level:
     org.hibernate.SQL: DEBUG
     org.hibernate.orm.jdbc.bind: TRACE
+jwt:
+  secret: dGhpc2lzYXZlcnlsb25nc2VjcmV0a2V5Zm9yaHMyNTY=
+  expiration: 36000000 # 10 hours in milliseconds

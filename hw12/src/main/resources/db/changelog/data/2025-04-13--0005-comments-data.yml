@@ -7,7 +7,7 @@ databaseChangeLog:
               - loadData:
                     file: classpath:/db/changelog/data/data/2025-04-13--0005-comments.csv
                     tableName: comments
-                    separator: ","
+                    separator: ";"
                     encoding: UTF-8
                     relativeToChangelogFile: false
                     columns:
