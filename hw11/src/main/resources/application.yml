@@ -3,6 +3,7 @@ spring:
     mongodb:
       uri: mongodb://localhost:27017/book_db
       database: book_db
+      clear-on-startup: false
 
 logging:
   level:

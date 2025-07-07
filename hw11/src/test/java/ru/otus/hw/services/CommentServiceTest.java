@@ -3,6 +3,8 @@ package ru.otus.hw.services;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.springframework.context.annotation.Import;
@@ -13,14 +15,19 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import ru.otus.hw.dto.CommentDto;
 import ru.otus.hw.mapper.CommentMapper;
+import ru.otus.hw.migrate.InitialTestDataMigration;
+import ru.otus.hw.migration.InitialDataMigration;
+import ru.otus.hw.models.Author;
 import ru.otus.hw.models.Book;
+import ru.otus.hw.models.Comment;
+import ru.otus.hw.models.Genre;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataMongoTest
-@Import({CommentServiceImpl.class, CommentMapper.class})
+@Import({CommentServiceImpl.class, CommentMapper.class, InitialTestDataMigration.class})
 @DisplayName("Tests for CommentService")
 class CommentServiceTest {
 

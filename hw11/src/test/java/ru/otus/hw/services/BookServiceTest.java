@@ -11,6 +11,7 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import ru.otus.hw.dto.BookDto;
 import ru.otus.hw.mapper.BookMapper;
+import ru.otus.hw.migrate.InitialTestDataMigration;
 import ru.otus.hw.models.Author;
 import ru.otus.hw.models.Genre;
 
@@ -19,7 +20,7 @@ import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataMongoTest
-@Import({BookServiceImpl.class, BookMapper.class})
+@Import({BookServiceImpl.class, BookMapper.class, InitialTestDataMigration.class})
 @DisplayName("Book Service Tests for MongoDB")
 class BookServiceTest {
 

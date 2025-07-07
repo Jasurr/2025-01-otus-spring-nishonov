@@ -7,11 +7,12 @@ import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.springframework.context.annotation.Import;
 import reactor.test.StepVerifier;
 import ru.otus.hw.mapper.GenreMapper;
+import ru.otus.hw.migrate.InitialTestDataMigration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataMongoTest
-@Import({GenreServiceImpl.class, GenreMapper.class})
+@Import({GenreServiceImpl.class, GenreMapper.class, InitialTestDataMigration.class})
 @DisplayName("Genre Service Tests for MongoDB")
 class GenreServiceImplTest {
 

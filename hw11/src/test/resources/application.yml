@@ -3,3 +3,4 @@ spring:
     mongodb:
       database: testdb
       uri: mongodb://localhost:27017/testdb
+      clear-on-startup: false

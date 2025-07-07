@@ -5,11 +5,14 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
+import ru.otus.hw.migrate.InitialTestDataMigration;
 import ru.otus.hw.models.Book;
 import ru.otus.hw.models.Comment;
 
@@ -17,6 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @DataMongoTest
 @DisplayName("Comment Repository Tests for MongoDB (Reactive)")
+@Import(InitialTestDataMigration.class)
 class CommentRepositoryTest {
 
     private static final String TEST_COMMENT_MESSAGE = "Test comment";
@@ -33,17 +37,28 @@ class CommentRepositoryTest {
 
     @BeforeEach
     void setUp() {
+        // Create a test book
+        Book testBook = new Book();
+        testBook.setTitle(TEST_BOOK_TITLE);
+        // Clear comments and insert the test book
+        Mono<Void> clearComments = reactiveMongoTemplate.remove(new Query(), Comment.class).then();
+        Mono<Book> saveBook = reactiveMongoTemplate.save(testBook);
+
+        // Chain operations and verify
         StepVerifier.create(
-                        reactiveMongoTemplate.remove(new Query(), Comment.class)
-                                .then(reactiveMongoTemplate.findOne(Query.query(Criteria.where("title").is(TEST_BOOK_TITLE)), Book.class))
-                                .doOnNext(fetchedBook -> System.out.println("Fetched book: " + fetchedBook))
-                                .doOnError(error -> System.err.println("Error fetching book: " + error.getMessage()))
+                        clearComments
+                                .then(saveBook)
+                                .doOnNext(savedBook -> {
+                                    System.out.println("Saved book: " + savedBook);
+                                    this.book = savedBook; // Store the saved book
+                                })
+                                .doOnError(error -> System.err.println("Error setting up test data: " + error.getMessage()))
                 )
-                .assertNext(fetchedBook -> {
-                    assertThat(fetchedBook)
-                            .as("Test book '" + TEST_BOOK_TITLE + "' not found in test data")
-                            .isNotNull();
-                    this.book = fetchedBook;
+                .assertNext(savedBook -> {
+                    assertThat(savedBook)
+                            .as("Test book '" + TEST_BOOK_TITLE + "' should be saved")
+                            .isNotNull()
+                            .hasFieldOrPropertyWithValue("title", TEST_BOOK_TITLE);
                 })
                 .verifyComplete();
     }
@@ -71,14 +86,12 @@ class CommentRepositoryTest {
                 .verifyComplete();
     }
 
-
     @Test
     @DisplayName("Should find comments by book ID")
     void shouldFindByBookId() {
         // Given
         Comment comment = createTestComment();
-        reactiveMongoTemplate.save(comment)
-                .as(StepVerifier::create)
+        StepVerifier.create(reactiveMongoTemplate.save(comment))
                 .expectNextCount(1)
                 .verifyComplete();
 
@@ -89,7 +102,7 @@ class CommentRepositoryTest {
         StepVerifier.create(commentsFlux.collectList())
                 .assertNext(comments -> assertThat(comments)
                         .isNotEmpty()
-                        .hasSize(1) // More specific since we cleared comments in setUp
+                        .hasSize(1)
                         .first()
                         .satisfies(c -> {
                             assertThat(c.getMessage()).isEqualTo(TEST_COMMENT_MESSAGE);
@@ -111,7 +124,8 @@ class CommentRepositoryTest {
                                 })
                                 .flatMap(updatedComment ->
                                         reactiveMongoTemplate.findOne(
-                                                Query.query(Criteria.where("_id").is(updatedComment.getId())), Comment.class
+                                                Query.query(Criteria.where("_id").is(updatedComment.getId())),
+                                                Comment.class
                                         )
                                 )
                 )
