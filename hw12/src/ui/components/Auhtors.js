@@ -8,9 +8,23 @@ export default class Authors extends React.Component {
     }
 
     componentDidMount() {
-        fetch('/api/v1/authors')
-            .then(response => response.json())
-            .then(authors => this.setState({authors}));
+        fetch('/api/v1/authors', {
+            headers: {
+                'Content-Type': 'application/json', // Optional, include if the API expects JSON
+                'Authorization': `Bearer ${localStorage.getItem('token')}` // Add Bearer token
+            }
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch authors');
+                }
+                return response.json();
+            })
+            .then(authors => this.setState({ authors }))
+            .catch(error => {
+                console.error('Error fetching authors:', error);
+                // Optionally handle the error (e.g., show a message to the user)
+            });
     }
 
     render() {

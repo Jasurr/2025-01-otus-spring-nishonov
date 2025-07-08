@@ -7,9 +7,23 @@ export default class Genres extends React.Component {
     }
 
     componentDidMount() {
-        fetch('/api/v1/genres')
-            .then(response => response.json())
-            .then(genres => this.setState({genres}));
+        fetch('/api/v1/genres', {
+            headers: {
+                'Content-Type': 'application/json', // Optional, include if needed
+                'Authorization': `Bearer ${localStorage.getItem('token')}` // Add Bearer token
+            }
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch genres');
+                }
+                return response.json();
+            })
+            .then(genres => this.setState({ genres }))
+            .catch(error => {
+                console.error('Error fetching genres:', error);
+                // Optionally handle the error (e.g., set error state or redirect)
+            });
     }
 
     render() {

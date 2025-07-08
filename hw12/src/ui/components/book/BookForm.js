@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
+import {AuthContext} from "../AuthContext";
 
 const BookForm = () => {
+    const { token } = useContext(AuthContext); // Access token from AuthContext
     const [state, setState] = useState({
         bookId: '',
         title: '',
@@ -10,7 +12,7 @@ const BookForm = () => {
         message: '',
         authors: [],
         genresList: [],
-        loading: true // Added loading state
+        loading: true
     });
     const navigate = useNavigate();
     const { id } = useParams();
@@ -21,8 +23,17 @@ const BookForm = () => {
             if (!id) return;
             try {
                 setState(prev => ({ ...prev, bookId: id, loading: true }));
-                const response = await fetch(`/api/v1/books/${id}`);
+                const response = await fetch(`/api/v1/books/${id}`, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token || localStorage.getItem('token')}` // Use token from context or localStorage
+                    }
+                });
                 if (!response.ok) {
+                    if (response.status === 401) {
+                        navigate('/login'); // Redirect to login if unauthorized
+                        throw new Error('Unauthorized access');
+                    }
                     throw new Error('Failed to fetch book data');
                 }
                 const data = await response.json();
@@ -42,8 +53,17 @@ const BookForm = () => {
         // Function to fetch authors
         const fetchAuthors = async () => {
             try {
-                const response = await fetch('/api/v1/authors');
+                const response = await fetch('/api/v1/authors', {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token || localStorage.getItem('token')}`
+                    }
+                });
                 if (!response.ok) {
+                    if (response.status === 401) {
+                        navigate('/login');
+                        throw new Error('Unauthorized access');
+                    }
                     throw new Error('Failed to fetch authors');
                 }
                 const authors = await response.json();
@@ -57,8 +77,17 @@ const BookForm = () => {
         // Function to fetch genres
         const fetchGenres = async () => {
             try {
-                const response = await fetch('/api/v1/genres');
+                const response = await fetch('/api/v1/genres', {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token || localStorage.getItem('token')}`
+                    }
+                });
                 if (!response.ok) {
+                    if (response.status === 401) {
+                        navigate('/login');
+                        throw new Error('Unauthorized access');
+                    }
                     throw new Error('Failed to fetch genres');
                 }
                 const genres = await response.json();
@@ -73,7 +102,7 @@ const BookForm = () => {
         fetchBook();
         fetchAuthors();
         fetchGenres();
-    }, [id]);
+    }, [id, token, navigate]);
 
     const handleChange = (e) => {
         setState(prev => ({ ...prev, [e.target.id]: e.target.value }));
@@ -101,25 +130,31 @@ const BookForm = () => {
         try {
             const response = await fetch(url, {
                 method,
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token || localStorage.getItem('token')}`
+                },
                 body: JSON.stringify(book)
             });
-            if (response.ok) {
-                setState({
-                    bookId: '',
-                    title: '',
-                    author: '',
-                    genres: [],
-                    message: bookId ? 'Book updated successfully!' : 'Book added successfully!',
-                    authors: state.authors,
-                    genresList: state.genresList,
-                    loading: false
-                });
-                navigate('/');
-            } else {
+            if (!response.ok) {
+                if (response.status === 401) {
+                    navigate('/login');
+                    throw new Error('Unauthorized access');
+                }
                 const error = await response.json();
                 throw new Error(error.message || `Failed to ${bookId ? 'update' : 'add'} the book.`);
             }
+            setState({
+                bookId: '',
+                title: '',
+                author: '',
+                genres: [],
+                message: bookId ? 'Book updated successfully!' : 'Book added successfully!',
+                authors: state.authors,
+                genresList: state.genresList,
+                loading: false
+            });
+            navigate('/');
         } catch (error) {
             setState(prev => ({ ...prev, message: error.message }));
         }
@@ -176,7 +211,7 @@ const BookForm = () => {
                     </select>
 
                     <div className="buttons">
-                        <button type="submit">Save</button>
+                        <button type="submit" className={"button-add"}>Save</button>
                         <Link to="/" className="button-cancel">Cancel</Link>
                     </div>
                 </form>

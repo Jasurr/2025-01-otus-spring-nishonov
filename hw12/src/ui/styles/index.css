@@ -11,6 +11,18 @@ h1 {
     margin-bottom: 40px;
 }
 
+h2 {
+    text-align: center;
+    color: #2c3e50;
+    margin-bottom: 30px;
+}
+
+h3 {
+    text-align: center;
+    color: #2c3e50;
+    margin: 30px 0;
+}
+
 nav {
     display: flex;
     justify-content: center;
@@ -31,50 +43,24 @@ nav a:hover {
     background-color: #2c3e50;
 }
 
+nav button {
+    padding: 12px 24px;
+    background-color: #c0392b;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+nav button:hover {
+    background-color: #a93226;
+}
+
 footer {
     margin-top: 60px;
     color: #888;
     font-size: 0.9em;
-}
-
-h2 {
-    text-align: center;
-    color: #2c3e50;
-    margin-bottom: 30px;
-}
-
-.button {
-    display: inline-block;
-    padding: 10px 20px;
-    margin: 5px 0;
-    color: white;
-    text-decoration: none;
-    border-radius: 6px;
-    transition: background-color 0.3s ease;
-}
-
-.button-add {
-    background-color: #27ae60;
-}
-
-.button-add:hover {
-    background-color: #219150;
-}
-
-.button-edit {
-    background-color: #2980b9;
-}
-
-.button-edit:hover {
-    background-color: #216a94;
-}
-
-.button-delete {
-    background-color: #c0392b;
-}
-
-.button-delete:hover {
-    background-color: #a93226;
 }
 
 .table-container {
@@ -105,7 +91,12 @@ td {
     color: #555;
 }
 
-.action-buttons a {
+.action-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.action-buttons a, .action-buttons button {
     margin-right: 8px;
 }
 
@@ -114,69 +105,7 @@ td {
     margin-bottom: 20px;
 }
 
-.button-comment {
-    background-color: #8e44ad;
-}
-
-.button-comment:hover {
-    background-color: #732d91;
-}
-
-a.button-home {
-    background-color: #2980b9;
-    color: white;
-    border: none;
-    padding: 10px 25px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: 600;
-    text-decoration: none;
-    margin: 0 10px;
-    display: inline-block;
-    transition: background-color 0.3s ease;
-}
-
-a.button-home:hover {
-    background-color: #216a94;
-}
-
-.buttons {
-    margin-top: 25px;
-    text-align: center;
-}
-
-.button-submit {
-    background-color: #2ecc71;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: 600;
-    margin-right: 10px;
-    transition: background-color 0.3s ease;
-}
-
-.button-submit:hover {
-    background-color: #27ae60;
-}
-
-.button-cancel {
-    background-color: #bdc3c7;
-    color: #2c3e50;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: background-color 0.3s ease;
-}
-
-.button-cancel:hover {
-    background-color: #95a5a6;
-}
-
-form {
+.book-add, form {
     max-width: 500px;
     margin: 0 auto;
     background-color: white;
@@ -192,7 +121,10 @@ label {
     color: #34495e;
 }
 
-input[type="text"], select {
+input[type="text"],
+input[type="password"],
+textarea,
+select {
     width: 100%;
     padding: 10px;
     margin-top: 5px;
@@ -205,32 +137,93 @@ select[multiple] {
     height: 120px;
 }
 
+.button {
+    display: inline-block;
+    padding: 10px 20px;
+    text-decoration: none;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.3s ease;
+}
+
+.button-add, .button-submit {
+    background-color: #2ecc71;
+    color: white;
+}
+
+.button-add:hover, .button-submit:hover {
+    background-color: #27ae60;
+}
+
+.button-edit {
+    background-color: #2980b9;
+    color: white;
+}
+
+.button-edit:hover {
+    background-color: #216a94;
+}
+
+.button-delete {
+    background-color: #c0392b;
+    color: white;
+}
+
+.button-delete:hover {
+    background-color: #a93226;
+}
+
+.button-comment {
+    background-color: #8e44ad;
+    color: white;
+}
+
+.button-comment:hover {
+    background-color: #732d91;
+}
+
+.button-cancel {
+    background-color: #bdc3c7;
+    color: #2c3e50;
+}
+
+.button-cancel:hover {
+    background-color: #95a5a6;
+}
+
+.button-home {
+    background-color: #2980b9;
+    color: white;
+    padding: 10px 25px;
+    border-radius: 5px;
+}
+
+.button-home:hover {
+    background-color: #216a94;
+}
+
 .buttons {
     margin-top: 25px;
     text-align: center;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
 }
 
-button, a.button-cancel {
-    background-color: #27ae60;
-    color: white;
-    border: none;
-    padding: 10px 25px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: 600;
-    text-decoration: none;
-    margin: 0 10px;
-    display: inline-block;
+ul {
+    list-style: none;
+    padding: 0;
+    max-width: 500px;
+    margin: auto;
 }
 
-a.button-cancel {
-    background-color: #7f8c8d;
-}
-
-button:hover {
-    background-color: #219150;
-}
-
-a.button-cancel:hover {
-    background-color: #707b7c;
+li {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    background-color: white;
+    margin-bottom: 5px;
+    border-radius: 4px;
+    color: #555;
 }

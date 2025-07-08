@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import {AuthContext} from "../AuthContext";
 
 const CommentForm = () => {
+    const { token } = useContext(AuthContext); // Access token from AuthContext
     const navigate = useNavigate();
     const location = useLocation();
     const queryParams = new URLSearchParams(location.search);
@@ -18,10 +20,19 @@ const CommentForm = () => {
             return;
         }
 
-        // Assume an endpoint to fetch comment by ID
-        fetch(`/api/v1/book/comments/${commentId}`)
+        // Fetch comment by ID with Bearer token
+        fetch(`/api/v1/book/comments/${commentId}`, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token || localStorage.getItem('token')}` // Use token from context or localStorage
+            }
+        })
             .then(response => {
                 if (!response.ok) {
+                    if (response.status === 401) {
+                        navigate('/login'); // Redirect to login if unauthorized
+                        throw new Error('Unauthorized access');
+                    }
                     throw new Error('Failed to fetch comment');
                 }
                 return response.json();
@@ -34,7 +45,7 @@ const CommentForm = () => {
                 setError(err.message);
                 setLoading(false);
             });
-    }, [commentId, bookId]);
+    }, [commentId, bookId, token, navigate]);
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -46,15 +57,23 @@ const CommentForm = () => {
         const updatedComment = {
             id: commentId,
             message: message
-        }
+        };
 
+        // Update comment with Bearer token
         fetch(`/api/v1/book/comments`, {
             method: 'PUT',
-            headers: {'Content-Type': 'application/json'},
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token || localStorage.getItem('token')}` // Use token from context or localStorage
+            },
             body: JSON.stringify(updatedComment)
         })
             .then(response => {
                 if (!response.ok) {
+                    if (response.status === 401) {
+                        navigate('/login'); // Redirect to login if unauthorized
+                        throw new Error('Unauthorized access');
+                    }
                     return response.json().then(err => {
                         throw new Error(err.message || 'Failed to update comment');
                     });
@@ -87,15 +106,15 @@ const CommentForm = () => {
                 <p style={{ textAlign: 'center' }}>Loading...</p>
             ) : (
                 <form onSubmit={handleSubmit}>
-                    <textarea
-                        name="message"
-                        rows="4"
-                        style={{ width: '100%', padding: '10px' }}
-                        placeholder="Enter your comment"
-                        value={message}
-                        onChange={(e) => setMessage(e.target.value)}
-                        required
-                    />
+          <textarea
+              name="message"
+              rows="4"
+              style={{ width: '100%', padding: '10px' }}
+              placeholder="Enter your comment"
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              required
+          />
                     <div style={{ marginTop: '25px', textAlign: 'center' }}>
                         <button
                             type="submit"

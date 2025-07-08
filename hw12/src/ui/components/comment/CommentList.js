@@ -1,8 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import React, { useState, useEffect, useContext } from 'react';
+import { Link, useParams, useNavigate } from 'react-router-dom';
+import {AuthContext} from "../AuthContext";
 
 const CommentList = () => {
     const { bookId } = useParams();
+    const { token } = useContext(AuthContext); // Access token from AuthContext
+    const navigate = useNavigate();
     const [comments, setComments] = useState([]);
     const [newComment, setNewComment] = useState('');
     const [error, setError] = useState('');
@@ -15,12 +18,19 @@ const CommentList = () => {
             return;
         }
 
-        const request = {
-            bookId
-        }
-        fetch(`/api/v1/book/comments?bookId=${bookId}`)
+        // Fetch comments with Bearer token
+        fetch(`/api/v1/book/comments?bookId=${bookId}`, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token || localStorage.getItem('token')}` // Use token from context or localStorage
+            }
+        })
             .then(response => {
                 if (!response.ok) {
+                    if (response.status === 401) {
+                        navigate('/login'); // Redirect to login if unauthorized
+                        throw new Error('Unauthorized access');
+                    }
                     throw new Error('Failed to fetch comments');
                 }
                 return response.json();
@@ -33,7 +43,7 @@ const CommentList = () => {
                 setError(err.message);
                 setLoading(false);
             });
-    }, [bookId]);
+    }, [bookId, token, navigate]);
 
     const handleAddComment = (e) => {
         e.preventDefault();
@@ -45,21 +55,41 @@ const CommentList = () => {
         const comment = {
             message: newComment,
             bookId
-        }
+        };
+
+        // Add new comment with Bearer token
         fetch(`/api/v1/book/comments`, {
             method: 'POST',
-            headers: {'Content-Type': 'application/json'},
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token || localStorage.getItem('token')}`
+            },
             body: JSON.stringify(comment)
         })
             .then(response => {
                 if (!response.ok) {
+                    if (response.status === 401) {
+                        navigate('/login');
+                        throw new Error('Unauthorized access');
+                    }
                     return response.json().then(err => {
                         throw new Error(err.message || 'Failed to add comment');
                     });
                 }
-                return fetch(`/api/v1/book/comments?bookId=${bookId}`);
+                // Refetch comments after adding
+                return fetch(`/api/v1/book/comments?bookId=${bookId}`, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token || localStorage.getItem('token')}`
+                    }
+                });
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch comments');
+                }
+                return response.json();
+            })
             .then(data => {
                 setComments(Array.isArray(data) ? data : []);
                 setNewComment('');
@@ -75,11 +105,20 @@ const CommentList = () => {
             return;
         }
 
+        // Delete comment with Bearer token
         fetch(`/api/v1/book/comments/${commentId}`, {
-            method: 'DELETE'
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token || localStorage.getItem('token')}`
+            }
         })
             .then(response => {
                 if (!response.ok) {
+                    if (response.status === 401) {
+                        navigate('/login');
+                        throw new Error('Unauthorized access');
+                    }
                     return response.json().then(err => {
                         throw new Error(err.message || 'Failed to delete comment');
                     });
@@ -191,15 +230,15 @@ const CommentList = () => {
                 Add New Comment
             </h3>
             <form onSubmit={handleAddComment}>
-                <textarea
-                    name="message"
-                    rows="4"
-                    style={{ width: '100%', padding: '10px' }}
-                    placeholder="Enter your comment"
-                    value={newComment}
-                    onChange={(e) => setNewComment(e.target.value)}
-                    required
-                />
+        <textarea
+            name="message"
+            rows="4"
+            style={{ width: '100%', padding: '10px' }}
+            placeholder="Enter your comment"
+            value={newComment}
+            onChange={(e) => setNewComment(e.target.value)}
+            required
+        />
                 <div style={{ marginTop: '25px', textAlign: 'center' }}>
                     <button
                         type="submit"
