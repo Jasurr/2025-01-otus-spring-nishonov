@@ -6,10 +6,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.otus.hw.dto.AuthorDto;
 import ru.otus.hw.dto.BookDto;
 import ru.otus.hw.dto.GenreDto;
+import ru.otus.hw.security.JwtUtil;
 import ru.otus.hw.services.BookService;
 
 import java.util.List;
@@ -21,6 +23,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -42,7 +45,11 @@ class BookRestControllerTest {
     @MockBean
     private BookService bookService;
 
+    @MockBean
+    private JwtUtil jwtUtil;
+
     @Test
+    @WithMockUser(username = "admin", roles = {"ADMIN"})
     void testGetAllBooks() throws Exception {
         // Arrange
         List<BookDto> books = List.of(
@@ -66,6 +73,7 @@ class BookRestControllerTest {
     }
 
     @Test
+    @WithMockUser(username = "admin", roles = {"ADMIN"})
     void testGetBookByIdFound() throws Exception {
         // Arrange
         BookDto book = new BookDto(1L, "Book One", new AuthorDto(1L, "Author One"),
@@ -84,6 +92,7 @@ class BookRestControllerTest {
     }
 
     @Test
+    @WithMockUser(username = "admin", roles = {"ADMIN"})
     void testGetBookByIdNotFound() throws Exception {
         // Arrange
         given(bookService.findById(1L)).willReturn(Optional.empty());
@@ -95,6 +104,7 @@ class BookRestControllerTest {
     }
 
     @Test
+    @WithMockUser(username = "admin", roles = {"ADMIN"})
     void testSaveNewBook() throws Exception {
         // Arrange
         BookDto inputDto = new BookDto(null, "New Book", new AuthorDto(1L, "Author One"),
@@ -105,6 +115,7 @@ class BookRestControllerTest {
 
         // Act & Assert
         mockMvc.perform(post("/api/v1/books")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(inputDto)))
                 .andExpect(status().isOk())
@@ -116,6 +127,7 @@ class BookRestControllerTest {
     }
 
     @Test
+    @WithMockUser(username = "admin", roles = {"ADMIN"})
     void testUpdateBook() throws Exception {
         // Arrange
         BookDto inputDto = new BookDto(1L, "Updated Book", new AuthorDto(1L, "Author One"),
@@ -126,6 +138,7 @@ class BookRestControllerTest {
 
         // Act & Assert
         mockMvc.perform(put("/api/v1/books")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(inputDto)))
                 .andExpect(status().isOk())
@@ -137,12 +150,14 @@ class BookRestControllerTest {
     }
 
     @Test
+    @WithMockUser(username = "admin", roles = {"ADMIN"})
     void testDeleteBook() throws Exception {
         // Arrange
         doNothing().when(bookService).deleteById(1L);
 
         // Act & Assert
         mockMvc.perform(delete("/api/v1/books/1")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 

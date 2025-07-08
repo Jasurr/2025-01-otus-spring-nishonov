@@ -6,9 +6,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.otus.hw.dto.CommentDto;
 import ru.otus.hw.dto.CommentRequest;
+import ru.otus.hw.security.JwtUtil;
 import ru.otus.hw.services.CommentService;
 
 import java.util.List;
@@ -18,6 +20,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -33,7 +36,12 @@ class CommentRestControllerTest {
     @MockBean
     private CommentService commentService;
 
+    @MockBean
+    private JwtUtil jwtUtil;
+
+
     @Test
+    @WithMockUser(username = "admin", roles = {"ADMIN"})
     void testGetCommentFound() throws Exception {
         // Arrange
         CommentDto comment = new CommentDto(1L, "Great book!");
@@ -49,6 +57,7 @@ class CommentRestControllerTest {
     }
 
     @Test
+    @WithMockUser(username = "admin", roles = {"ADMIN"})
     void testGetCommentNotFound() throws Exception {
         // Arrange
         given(commentService.findById(1L)).willReturn(Optional.empty());
@@ -60,6 +69,7 @@ class CommentRestControllerTest {
     }
 
     @Test
+    @WithMockUser(username = "admin", roles = {"ADMIN"})
     void testGetCommentsByBookId() throws Exception {
         // Arrange
         List<CommentDto> comments = List.of(
@@ -81,6 +91,7 @@ class CommentRestControllerTest {
     }
 
     @Test
+    @WithMockUser(username = "admin", roles = {"ADMIN"})
     void testAddComment() throws Exception {
         // Arrange
         CommentRequest commentRequest = new CommentRequest(1L, "Nice book!");
@@ -88,6 +99,7 @@ class CommentRestControllerTest {
 
         // Act & Assert
         mockMvc.perform(post("/api/v1/book/comments")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(commentRequest)))
                 .andExpect(status().isOk())
@@ -95,6 +107,7 @@ class CommentRestControllerTest {
     }
 
     @Test
+    @WithMockUser(username = "admin", roles = {"ADMIN"})
     void testUpdateComment() throws Exception {
         // Arrange
         CommentDto commentDto = new CommentDto(1L, "Updated comment");
@@ -102,6 +115,7 @@ class CommentRestControllerTest {
 
         // Act & Assert
         mockMvc.perform(put("/api/v1/book/comments")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(commentDto)))
                 .andExpect(status().isOk())
@@ -109,12 +123,14 @@ class CommentRestControllerTest {
     }
 
     @Test
+    @WithMockUser(username = "admin", roles = {"ADMIN"})
     void testDeleteComment() throws Exception {
         // Arrange
         doNothing().when(commentService).deleteById(1L);
 
         // Act & Assert
         mockMvc.perform(delete("/api/v1/book/comments/1")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().string("")); // Expect empty body for Void response

@@ -5,8 +5,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.otus.hw.dto.GenreDto;
+import ru.otus.hw.security.JwtUtil;
 import ru.otus.hw.services.GenreService;
 
 import java.util.List;
@@ -27,7 +29,11 @@ class GenreRestControllerTest {
     @MockBean
     private GenreService genreService;
 
+    @MockBean
+    private JwtUtil jwtUtil;
+
     @Test
+    @WithMockUser(username = "admin", roles = {"ADMIN"})
     void testGetAllGenres() throws Exception {
         // Arrange
         List<GenreDto> genres = List.of(
@@ -49,6 +55,7 @@ class GenreRestControllerTest {
     }
 
     @Test
+    @WithMockUser(username = "admin", roles = {"ADMIN"})
     void testGetAllGenresEmptyList() throws Exception {
         // Arrange
         given(genreService.findAll()).willReturn(List.of());

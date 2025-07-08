@@ -27,6 +27,7 @@ public class AppUserServiceImpl implements AppUserService, UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) {
+
         AppUser appUser = appUserRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
         Set<SimpleGrantedAuthority> authorities = getAuthorities(appUser);

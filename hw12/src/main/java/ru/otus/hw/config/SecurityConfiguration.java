@@ -59,8 +59,6 @@ public class SecurityConfiguration {
 
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
-        return (web) -> web.ignoring().requestMatchers("/h2-console/**",
-                "/favicon.ico",
-                "/login/**");
+        return (web) -> web.ignoring().requestMatchers("/h2-console/**", "/favicon.ico");
     }
 }
