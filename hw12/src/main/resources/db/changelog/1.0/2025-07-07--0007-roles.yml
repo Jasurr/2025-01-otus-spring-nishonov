@@ -1,0 +1,21 @@
+databaseChangeLog:
+  - changeSet:
+      id: 2025-07-09--0002-roles
+      author: Jasur
+      changes:
+        - createTable:
+            tableName: roles
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: VARCHAR(50)
+                  constraints:
+                    unique: true
+                    nullable: false
