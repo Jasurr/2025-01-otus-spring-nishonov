@@ -26,7 +26,7 @@ class AppUserRepositoryTest {
         var savedUser = new AppUser();
         savedUser.setPassword("password");
         savedUser.setUsername("username");
-        savedUser.setRoles(Set.of(Role.USER, Role.ADMIN));
+        savedUser.setRoles(Set.of(new Role(1L, "ADMIN"), new Role(2L, "USER")));
         em.persist(savedUser);
         em.flush();
         // Assuming some test data is preloaded in the test database

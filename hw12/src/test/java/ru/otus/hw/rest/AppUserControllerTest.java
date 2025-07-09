@@ -1,5 +1,6 @@
 package ru.otus.hw.rest;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -8,6 +9,8 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.otus.hw.dto.AppUserDto;
+import ru.otus.hw.dto.RoleDto;
+import ru.otus.hw.models.Role;
 import ru.otus.hw.security.JwtUtil;
 import ru.otus.hw.services.AppUserService;
 
@@ -31,12 +34,19 @@ class AppUserControllerTest {
     @MockBean
     private JwtUtil jwtUtil;
 
+    private Role role;
+
+    @BeforeEach
+    void setUp() {
+        role = new Role(1L, "ADMIN");
+    }
+
     @Test
     @WithMockUser(username = "admin", roles = {"ADMIN"})
     void adminCanAccessUsersEndpoint() throws Exception {
         when(appUserService.findAll()).thenReturn(List.of(
-                new AppUserDto(1L, "admin", Set.of("ADMIN")),
-                new AppUserDto(2L, "user", Set.of("USER"))
+                new AppUserDto(1L, "admin", Set.of(new RoleDto(1L, "ADMIN"))),
+                new AppUserDto(2L, "user", Set.of(new RoleDto(2L, "USER")))
         ));
 
         mockMvc.perform(get("/api/v1/users")

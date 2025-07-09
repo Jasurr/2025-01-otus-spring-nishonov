@@ -1,10 +1,10 @@
 databaseChangeLog:
   - changeSet:
-      id: 2025-07-09--0001-app_users
+      id: 2025-07-09--0002-roles
       author: Jasur
       changes:
         - createTable:
-            tableName: app_users
+            tableName: roles
             columns:
               - column:
                   name: id
@@ -14,13 +14,8 @@ databaseChangeLog:
                     primaryKey: true
                     nullable: false
               - column:
-                  name: username
-                  type: VARCHAR(255)
+                  name: name
+                  type: VARCHAR(50)
                   constraints:
                     unique: true
-                    nullable: false
-              - column:
-                  name: password
-                  type: VARCHAR(255)
-                  constraints:
                     nullable: false

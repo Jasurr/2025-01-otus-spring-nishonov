@@ -9,6 +9,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import ru.otus.hw.dto.AppUserDto;
+import ru.otus.hw.dto.RoleDto;
 import ru.otus.hw.mapper.AppUserMapper;
 import ru.otus.hw.models.AppUser;
 import ru.otus.hw.models.Role;
@@ -36,7 +37,7 @@ class AppUserServiceImplTest {
         appUser = new AppUser();
         appUser.setUsername("testuser");
         appUser.setPassword("password");
-        appUser.setRoles(Set.of(Role.USER, Role.ADMIN));
+        appUser.setRoles(Set.of(new Role(1L, "ADMIN"), new Role(2L, "USER")));
         appUserRepository.save(appUser);
     }
 

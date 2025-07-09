@@ -5,5 +5,5 @@ import java.util.Set;
 public record AppUserDto(
         Long id,
         String username,
-        Set<String> roles) {
+        Set<RoleDto> roles) {
 }

@@ -15,6 +15,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.otus.hw.dto.AppUserDto;
 import ru.otus.hw.dto.AuthRequest;
+import ru.otus.hw.dto.RoleDto;
 import ru.otus.hw.repositories.AppUserRepository;
 import ru.otus.hw.security.JwtUtil;
 import ru.otus.hw.services.AppUserService;
@@ -69,7 +70,7 @@ class AuthControllerTest {
         AppUserDto appUser = new AppUserDto(
                 1L,
                 "user",
-                Set.of("USER")
+                Set.of(new RoleDto(1L, "ADMIN"))
         );
 
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
